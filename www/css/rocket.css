@@ -1,0 +1,28 @@
+body {
+    background: url(../images/grey_wash_wall.png) repeat;
+    font-family: Impact;
+}
+
+#chart {
+    background: #ffffff none no-repeat;
+    width: 580px;
+    margin-left: auto;
+    margin-right: auto;
+    overflow: hidden;
+}
+
+#preview {
+    margin-top: 20px;
+    background: #ffffff none no-repeat;
+    width: 580px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.title {
+    font-size: xx-large;
+    text-align: center;
+    width: auto;
+    margin-left: auto;
+    margin-right: auto;
+}

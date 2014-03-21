@@ -5,9 +5,9 @@ var app = express()
 
 io.set('log level', 1);
 
-var Altimeter = require('./altimeter');
+var Gyro = require('./gyro');
 
-var altimeter;
+var gyro;
 
 app.use(express.static('www'));
 
@@ -25,12 +25,12 @@ io.sockets.on('connection', function (socket) {
     console.log(data);
 
     // Initialize altimeter if not already
-    if(!altimeter) {
-      altimeter = new Altimeter(data);
+    if(!gyro) {
+      gyro = new Gyro(data);
     }
 
     // Emit altimeter data
-    altimeter.on('data', function(data) {
+    gyro.on('data', function(data) {
       socket.emit('data', data);
     });
   });

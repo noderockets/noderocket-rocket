@@ -33,7 +33,30 @@ io.sockets.on('connection', function (socket) {
     altimeter.on('data', function(data) {
       socket.emit('data', data);
     });
+
+    altimeter.on('armed', function() {
+      socket.emit('armed');
+    });
+
+    altimeter.on('maxAltitude', function(data) {
+      socket.emit('maxAltitude', data);
+    });
+
+    altimeter.on('parachute', function() {
+      socket.emit('parachute');
+    });
+  });
+
+  socket.on('servoAngles', function(data) {
+    altimeter.setServoInitAngle(data.init);
+    altimeter.setServoReleaseAngle(data.release);
+  });
+
+  socket.on('init', function() {
+    altimeter.emit('init');
+  });
+
+  socket.on('parachute', function() {
+    altimeter.emit('parachute');
   });
 });
-
-

@@ -14,6 +14,7 @@ function Altimeter(opts) {
 
     events.EventEmitter.call(this);
     var thiz = this;
+    var activated = false;
     var armed = false;
     var deployed = false;
     var initialAltitude = null;
@@ -30,6 +31,7 @@ function Altimeter(opts) {
             thiz.on('init', function() {
                 Logger.debug('Setting angle to ' + thiz.config.servoInitAngle);
                 my.servo.angle(thiz.config.servoInitAngle);
+                activated = false;
                 armed = false;
                 deployed = false;
                 initialAltitude = null;
@@ -39,23 +41,29 @@ function Altimeter(opts) {
                 Logger.debug('Setting angle to ' + thiz.config.servoReleaseAngle);
                 my.servo.angle(thiz.config.servoReleaseAngle);
             });
+            thiz.on('activate', function() {
+                Logger.debug('Activated');
+                activated = true;
+            });
             every(thiz.config.dataInterval, function() {
                 my.bmp180.getAltitude(thiz.config.mode, null, function(err, val) {
-                    if(initialAltitude === null) {
-                        initialAltitude = val.alt;
-                    }
-                    else if(armed === false && (val.alt - initialAltitude >= thiz.config.armAltDelta)) {
-                        armed = true;
-                        thiz.emit('armed');
-                    }
-                    else if(armed === true && deployed !== true) {
-                        if(val.alt > maxAltitude) {
-                            maxAltitude = val.alt;
-                            thiz.emit('maxAltitude', {alt: maxAltitude});
+                    if(activated) {
+                        if(initialAltitude === null) {
+                            initialAltitude = val.alt;
                         }
-                        else if (maxAltitude - val.alt >= thiz.config.deployAltDelta) {
-                            thiz.emit('parachute');
-                            deployed = true;
+                        else if(armed === false && (val.alt - initialAltitude >= thiz.config.armAltDelta)) {
+                            armed = true;
+                            thiz.emit('armed');
+                        }
+                        else if(armed === true && deployed !== true) {
+                            if(val.alt > maxAltitude) {
+                                maxAltitude = val.alt;
+                                thiz.emit('maxAltitude', {alt: maxAltitude});
+                            }
+                            else if (maxAltitude - val.alt >= thiz.config.deployAltDelta) {
+                                thiz.emit('parachute', {alt: val.alt});
+                                deployed = true;
+                            }
                         }
                     }
                     if(err) console.log(err);

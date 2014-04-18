@@ -23,16 +23,20 @@ socket.on('maxAltitude', function (data) {
   console.log('Max Altitude: ' + data.alt);
 });
 
-socket.on('parachute', function () {
-  console.log('Deploying Parachute');
+socket.on('parachute', function (data) {
+  console.log('Deploying Parachute at ' + data.alt);
 });
 
 function deployParachute () {
 	socket.emit('parachute');
 }
 
-function init() {
-	socket.emit('init');
+function reset() {
+	socket.emit('reset');
+}
+
+function activate() {
+    socket.emit('activate');
 }
 
 function servoAngles(init, release) {

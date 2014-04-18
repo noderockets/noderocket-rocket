@@ -52,8 +52,12 @@ io.sockets.on('connection', function (socket) {
     altimeter.setServoReleaseAngle(data.release);
   });
 
-  socket.on('init', function() {
+  socket.on('reset', function() {
     altimeter.emit('init');
+  });
+
+  socket.on('activate', function() {
+    altimeter.emit('activate');
   });
 
   socket.on('parachute', function() {

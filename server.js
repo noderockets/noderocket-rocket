@@ -11,7 +11,7 @@ var altimeter;
 
 app.use(express.static('www'));
 
-server.listen(8082);
+server.listen(80);
 
 app.get('/', function (req, res) {
   res.sendfile(__dirname + '/index.html');

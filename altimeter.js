@@ -65,7 +65,7 @@ function Altimeter(opts) {
             altitudeBuffer[cnt++ % 5] = val.alt;
 
             if (cnt > 4) {
-              var min = 0;
+              var min = 50000;
               var max = 0;
 
               for(var i = 0; i < altitudeBuffer.length; i++) {
@@ -77,13 +77,11 @@ function Altimeter(opts) {
                 }
               }
 
-              var total = altitudeBuffer[0] +
-                altitudeBuffer[1] +
-                altitudeBuffer[2] +
-                altitudeBuffer[3] +
-                altitudeBuffer[4] - min - max;
+              var total = altitudeBuffer[0] + altitudeBuffer[1] + altitudeBuffer[2] +
+                altitudeBuffer[3] + altitudeBuffer[4] - min - max;
 
               var avg = total / 3;
+
               if (!initialAltitude) initialAltitude = avg;
 
               Logger.debug('High Altitude: ' + max);

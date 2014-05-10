@@ -19,6 +19,8 @@ function Altimeter(opts) {
   var deployed = false;
   var initialAltitude = null;
   var maxAltitude = null;
+  var altitudeBuffer = [];
+  var cnt = 0;
 
   Cylon.robot({
     connection: {name: 'raspi', adaptor: 'raspi'},
@@ -54,28 +56,62 @@ function Altimeter(opts) {
       });
       every(thiz.config.dataInterval, function () {
         my.bmp180.getAltitude(thiz.config.mode, null, function (err, val) {
-          if (activated) {
-            if (initialAltitude === null) {
-              initialAltitude = val.alt;
-            }
-            else if (armed === false && (val.alt - initialAltitude >= thiz.config.armAltDelta)) {
-              armed = true;
-              thiz.emit('armed');
-            }
-            else if (armed === true && deployed !== true) {
-              if (val.alt > maxAltitude) {
-                maxAltitude = val.alt;
-                thiz.emit('maxAltitude', {alt: maxAltitude});
+
+          if(!!err) {
+            console.log(err);
+          } else {
+            Logger.debug('Raw Alititude: ' + val.alt);
+
+            altitudeBuffer[cnt++ % 5] = val.alt;
+
+            if (cnt > 4) {
+              var min = 0;
+              var max = 0;
+
+              for(var i = 0; i < altitudeBuffer.length; i++) {
+                var value = altitudeBuffer[i];
+                if(value < min) {
+                  min = value;
+                } else if(value > max) {
+                  max = value;
+                }
               }
-              else if (maxAltitude - val.alt >= thiz.config.deployAltDelta) {
-                thiz.emit('parachute', {alt: val.alt});
-                deployed = true;
+
+              var total = altitudeBuffer[0] +
+                altitudeBuffer[1] +
+                altitudeBuffer[2] +
+                altitudeBuffer[3] +
+                altitudeBuffer[4] - min - max;
+
+              var avg = total / 3;
+              if (!initialAltitude) initialAltitude = avg;
+
+              Logger.debug('High Altitude: ' + max);
+              Logger.debug('Low Altitude: ' + min);
+              Logger.debug('Averaged Altitude: ' + avg);
+
+
+              thiz.emit('data', avg);
+
+              if (activated) {
+
+                if (armed === false && (avg - initialAltitude >= thiz.config.armAltDelta)) {
+                  armed = true;
+                  thiz.emit('armed');
+                }
+                else if (armed === true && deployed !== true) {
+                  if (avg > maxAltitude) {
+                    maxAltitude = avg;
+                    thiz.emit('maxAltitude', {alt: maxAltitude});
+                  }
+                  else if (maxAltitude - avg >= thiz.config.deployAltDelta) {
+                    thiz.emit('parachute', {alt: avg});
+                    deployed = true;
+                  }
+                }
               }
             }
-          }
-          if (err) console.log(err);
-          else {
-            thiz.emit('data', val);
+
           }
         });
       });

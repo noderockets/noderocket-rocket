@@ -60,6 +60,8 @@ function Altimeter(opts) {
           if(!!err) {
             console.log(err);
           } else {
+            Logger.debug('Raw Alititude: ' + val.alt);
+
             altitudeBuffer[cnt++ % 5] = val.alt;
 
             if (cnt > 4) {
@@ -75,7 +77,6 @@ function Altimeter(opts) {
                 }
               }
 
-
               var total = altitudeBuffer[0] +
                 altitudeBuffer[1] +
                 altitudeBuffer[2] +
@@ -84,7 +85,11 @@ function Altimeter(opts) {
 
               var avg = total / 3;
               if (!initialAltitude) initialAltitude = avg;
-              console.log('Alititude: ', avg);
+
+              Logger.debug('High Altitude: ' + max);
+              Logger.debug('Low Altitude: ' + min);
+              Logger.debug('Averaged Altitude: ' + avg);
+
 
               thiz.emit('data', avg);
 

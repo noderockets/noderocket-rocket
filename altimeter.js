@@ -9,7 +9,7 @@ function Altimeter(opts) {
         servoInitAngle: 150,
         servoReleaseAngle: 60,
         armAltDelta: 3,
-        deployAltDelta: .5
+        deployAltDelta: 2
     }, opts);
 
   events.EventEmitter.call(this);
@@ -88,7 +88,6 @@ function Altimeter(opts) {
               Logger.debug('Low Altitude: ' + min);
               Logger.debug('Averaged Altitude: ' + avg);
 
-
               thiz.emit('data', avg);
 
               if (activated) {
@@ -109,7 +108,6 @@ function Altimeter(opts) {
                 }
               }
             }
-
           }
         });
       });

@@ -7,9 +7,9 @@ function Altimeter(opts) {
         dataInterval: 100,
         mode: 1,
         servoInitAngle: 150,
-        servoReleaseAngle: 30,
+        servoReleaseAngle: 60,
         armAltDelta: 3,
-        deployAltDelta: 2
+        deployAltDelta: .5
     }, opts);
 
     events.EventEmitter.call(this);

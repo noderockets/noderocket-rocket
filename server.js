@@ -9,12 +9,12 @@ var Altimeter = require('./altimeter');
 
 var altimeter;
 
-app.use(express.static('www'));
+app.use(express.static(__dirname + '/www'));
 
 server.listen(80);
 
 app.get('/', function (req, res) {
-  res.sendfile(__dirname + '/index.html');
+  res.sendfile(__dirname + '/www/index.html');
 });
 
 // Socket IO configuration
@@ -42,8 +42,8 @@ io.sockets.on('connection', function (socket) {
       socket.emit('maxAltitude', data);
     });
 
-    altimeter.on('parachute', function() {
-      socket.emit('parachute');
+    altimeter.on('parachute', function(data) {
+      socket.emit('parachute', data);
     });
   });
 

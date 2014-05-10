@@ -11,8 +11,9 @@ socket.on('hello', function(data) {
 });
 
 socket.on('data', function (data) {
-  //console.log('Data', data);
-  if(data.alt) addData(data.alt);
+  console.log('Data', data);
+//  if(data.alt) addData(data.alt);
+  if(data.alt) addData(data);
 });
 
 socket.on('armed', function () {
@@ -20,11 +21,11 @@ socket.on('armed', function () {
 });
 
 socket.on('maxAltitude', function (data) {
-  console.log('Max Altitude: ' + data.alt);
+  console.log('Max Altitude: ' + data);
 });
 
 socket.on('parachute', function (data) {
-  console.log('Deploying Parachute at ' + data.alt);
+  console.log('Deploying Parachute at ' + data);
 });
 
 function deployParachute () {

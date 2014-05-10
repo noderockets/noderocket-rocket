@@ -1,0 +1,38 @@
+info: socket.io started
+{ dataInterval: 100 }
+I, [2014-05-10T17:46:39.945Z]  INFO -- : Initializing connections...
+I, [2014-05-10T17:46:39.955Z]  INFO -- : Initializing connection 'raspi'...
+D, [2014-05-10T17:46:39.965Z] DEBUG -- : Loading adaptor 'raspi'
+D, [2014-05-10T17:46:42.601Z] DEBUG -- : Registering Raspberry Pi adaptor for Robot 15454
+D, [2014-05-10T17:46:42.605Z] DEBUG -- : Registering GPIO AnalogSensor driver for Robot 15454
+D, [2014-05-10T17:46:42.627Z] DEBUG -- : Registering GPIO Button driver for Robot 15454
+D, [2014-05-10T17:46:42.628Z] DEBUG -- : Registering GPIO ContinuousServo driver for Robot 15454
+D, [2014-05-10T17:46:42.630Z] DEBUG -- : Registering GPIO LED driver for Robot 15454
+D, [2014-05-10T17:46:42.631Z] DEBUG -- : Registering GPIO MakeyButton driver for Robot 15454
+D, [2014-05-10T17:46:42.633Z] DEBUG -- : Registering GPIO Maxbotix driver for Robot 15454
+D, [2014-05-10T17:46:42.634Z] DEBUG -- : Registering GPIO Motor driver for Robot 15454
+D, [2014-05-10T17:46:42.636Z] DEBUG -- : Registering GPIO Servo driver for Robot 15454
+D, [2014-05-10T17:46:42.639Z] DEBUG -- : Registering i2c BlinkM driver for Robot 15454
+D, [2014-05-10T17:46:42.660Z] DEBUG -- : Registering i2c HMC6352 driver for Robot 15454
+D, [2014-05-10T17:46:42.661Z] DEBUG -- : Registering i2c MPL115A2 driver for Robot 15454
+D, [2014-05-10T17:46:42.663Z] DEBUG -- : Registering i2c BMP180 driver for Robot 15454
+D, [2014-05-10T17:46:42.665Z] DEBUG -- : Registering i2c MPU6050 driver for Robot 15454
+D, [2014-05-10T17:46:42.666Z] DEBUG -- : Registering i2c LCD driver for Robot 15454
+I, [2014-05-10T17:46:42.678Z]  INFO -- : Initializing devices...
+I, [2014-05-10T17:46:42.680Z]  INFO -- : Initializing device 'bmp180'...
+D, [2014-05-10T17:46:42.685Z] DEBUG -- : Loading driver 'bmp180'
+I, [2014-05-10T17:46:42.694Z]  INFO -- : Initializing device 'servo'...
+D, [2014-05-10T17:46:42.697Z] DEBUG -- : Loading driver 'servo'
+I, [2014-05-10T17:46:42.704Z]  INFO -- : Initializing device 'statusLed'...
+D, [2014-05-10T17:46:42.706Z] DEBUG -- : Loading driver 'led'
+I, [2014-05-10T17:46:42.713Z]  INFO -- : Starting connections...
+I, [2014-05-10T17:46:42.725Z]  INFO -- : Connecting to raspi on port none
+I, [2014-05-10T17:46:42.727Z]  INFO -- : Connecting to adaptor 'raspi'...
+I, [2014-05-10T17:46:42.733Z]  INFO -- : Starting devices...
+I, [2014-05-10T17:46:42.738Z]  INFO -- : Starting device bmp180
+I, [2014-05-10T17:46:42.764Z]  INFO -- : Starting device servo on pin 12
+I, [2014-05-10T17:46:42.766Z]  INFO -- : Driver servo started
+I, [2014-05-10T17:46:42.768Z]  INFO -- : Starting device statusLed on pin 13
+I, [2014-05-10T17:46:42.769Z]  INFO -- : Driver led started
+D, [2014-05-10T17:46:42.775Z] DEBUG -- : Setting angle to 150
+I, [2014-05-10T17:46:42.807Z]  INFO -- : Working...

@@ -25,7 +25,7 @@ function Altimeter(opts) {
     devices: [
       { name: 'bmp180', driver: 'bmp180' },
       { name: 'servo', driver: 'servo', pin: 12 },
-      { name: 'statusLed', driver: 'led', pin: 13 }
+      { name: 'statusLed', driver: 'led', pin: 7 }
     ],
 
     work: function (my) {

@@ -32,48 +32,77 @@ __Install Raspbian__
 __Install Prerequisites__
 
 1. First update the OS:
-        sudo apt-get update
-        sudo apt-get upgrade
+
+  ```bash
+sudo apt-get update
+sudo apt-get upgrade
+  ```
+  
 2. Checkout and build pi-blaster.  Pi-blaster enables PWM on the digital GPIO pins, making it possible to control a servo motor.
-        git clone https://github.com/sarfata/pi-blaster.git
-        cd pi-blaster
-        sudo make install
+
+  ```bash
+git clone https://github.com/sarfata/pi-blaster.git
+cd pi-blaster
+sudo make install
+  ```
+  
   Pi-blaster will now start automatically on reboot.
+  
 3. Enable the GPIO i2c modules.  Edit /etc/modules:
-        sudo nano /etc/modules
 
-   You need to add these two entries to the file:
-        i2c-bcm2708
-        i2c-dev
+  ```bash
+sudo nano /etc/modules
+  ```
 
-   Edit /etc/modprobe.d/raspi-blacklist.conf
-        sudo nano /etc/modprobe.d/raspi-blacklist.conf
+  You need to add these two entries to the file:
+  
+  ```bash
+i2c-bcm2708
+i2c-dev
+  ```
 
-   You need to make sure the following entries are commented out in the file:
-        #blacklist spi-bcm2708
-        #blacklist i2c-bcm2708
+  Edit /etc/modprobe.d/raspi-blacklist.conf
+  ```bash
+sudo nano /etc/modprobe.d/raspi-blacklist.conf
+  ```
+
+  You need to make sure the following entries are commented out in the file:
+  ```bash
+#blacklist spi-bcm2708
+#blacklist i2c-bcm2708
+  ```
 
 3. Download and install nodejs.
-        cd ~
-        sudo wget http://node-arm.herokuapp.com/node_latest_armhf.deb
-        sudo dpkg -i node_latest_armhf.deb
+
+  ```bash
+cd ~
+sudo wget http://node-arm.herokuapp.com/node_latest_armhf.deb
+sudo dpkg -i node_latest_armhf.deb
+  ```
 
 4. Reboot
-        sudo reboot
+
+  ```bash
+sudo reboot
+  ```
 
 __Rocket Software__
 
 Checkout and build the noderocket-rocket project:
 
-        git clone https://github.com/noderockets/noderocket-rocket.git
-        cd noderocket-rocket
-        npm install
+```bash
+git clone https://github.com/noderockets/noderocket-rocket.git
+cd noderocket-rocket
+npm install
+```
 
 This takes quite a while as it downloads and builds all of the dependencies.
 
 You need to run the project as root for it to have access to the GPIO pins.
 
-        sudo node server.js
+```bash
+sudo node server.js
+```
 
 You can access the rocket UI by entering the Pi's IP address into your browser.
 
@@ -81,13 +110,17 @@ _Make the rocket software run automatically_
 
 1. Install forever globally:
 
-        sudo npm install -g forever
+  ```bash
+sudo npm install -g forever
+  ```
 
 2. Copy and install the init.d script to start and stop the rocket:
 
-        sudo cp etc/rocket /etc/init.d
-        sudo chmod +x /etc/init.d/rocket
-        sudo update-rc.d rocket defaults
+  ```bash
+sudo cp etc/rocket /etc/init.d
+sudo chmod +x /etc/init.d/rocket
+sudo update-rc.d rocket defaults
+  ```
 
 3. If you didn't clone the rocket project to /home/pi/noderocket-rocket, edit /etc/init.d/rocket and point ROCKET_HOME to the correct path.
 

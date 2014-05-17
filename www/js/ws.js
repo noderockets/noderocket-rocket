@@ -19,7 +19,7 @@ socket.on('activate', function() {
 });
 
 socket.on('data', function (data) {
-//  console.log('Data', data);
+  console.log('Data', data);
 //  if(data.alt) addData(data.alt);
   if(data) addData(data);
 });

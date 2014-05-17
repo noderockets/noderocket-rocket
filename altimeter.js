@@ -22,8 +22,6 @@ function Altimeter(opts) {
   var deployed = false;
   var initialAltitude = null;
   var maxAltitude = null;
-  var altitudeBuffer = [];
-  var cnt = 0;
   var isTestMode = false;
 
   Cylon.robot({
@@ -60,7 +58,6 @@ function Altimeter(opts) {
 
       function toggleTestMode() {
         isTestMode = !isTestMode;
-        console.log(isTestMode);
         btnFn = function() {};
 
         if (isTestMode) thiz.emit('testModeEnabled');
@@ -72,6 +69,7 @@ function Altimeter(opts) {
       }
 
       thiz.on('testModeEnabled', function() {
+        Logger.debug('Enable Test Mode');
         armAltDelta = thiz.config.testArmAltDelta;
         deployAltDelta = thiz.config.testDeployAltDelta;
         flashy = setInterval(function() {
@@ -80,6 +78,7 @@ function Altimeter(opts) {
       });
 
       thiz.on('testModeDisabled', function() {
+        Logger.debug('Disable Test Mode');
         armAltDelta = thiz.config.armAltDelta;
         deployAltDelta = thiz.config.deployAltDelta;
         clearInterval(flashy);
@@ -87,7 +86,7 @@ function Altimeter(opts) {
       });
 
       thiz.on('init', function () {
-        Logger.debug('Setting angle to ' + thiz.config.servoInitAngle);
+        Logger.debug('Initializing angle to ' + thiz.config.servoInitAngle);
         my.servo.angle(thiz.config.servoInitAngle);
         activated = false;
         armed = false;
@@ -99,7 +98,7 @@ function Altimeter(opts) {
       });
 
       thiz.on('parachute', function () {
-        Logger.debug('Setting angle to ' + thiz.config.servoReleaseAngle);
+        Logger.debug('[[[PARACHUTE]]]: set angle to ' + thiz.config.servoReleaseAngle);
         my.blueLED.turnOff();
         my.servo.angle(thiz.config.servoReleaseAngle);
 
@@ -118,56 +117,27 @@ function Altimeter(opts) {
       thiz.emit('init');
 
       every(thiz.config.dataInterval, function () {
-        my.bmp180.getAltitude(thiz.config.mode, null, function (err, val) {
+        my.bmp180.getAltitude(thiz.config.mode, null, function (err, values) {
+          if (!!err) Logger.error(err);
+          else {
+            var alt = normalizeValue(values.alt);
+            thiz.emit('data', alt);
 
-          if(!!err) {
-            console.log(err);
-          } else {
-//            Logger.debug('Raw Alititude: ' + val.alt);
+            if (activated) {
 
-            altitudeBuffer[cnt++ % 5] = val.alt;
-
-            if (cnt > 4) {
-              var min = 50000;
-              var max = 0;
-
-              for(var i = 0; i < altitudeBuffer.length; i++) {
-                var value = altitudeBuffer[i];
-                if(value < min) {
-                  min = value;
-                } else if(value > max) {
-                  max = value;
-                }
+              if (armed === false && (alt - initialAltitude >= armAltDelta)) {
+                armed = true;
+                thiz.emit('armed');
               }
-
-              var total = altitudeBuffer[0] + altitudeBuffer[1] + altitudeBuffer[2] +
-                altitudeBuffer[3] + altitudeBuffer[4] - min - max;
-
-              var avg = total / 3;
-
-              if (!initialAltitude) initialAltitude = avg;
-
-//              Logger.debug('High Altitude: ' + max);
-//              Logger.debug('Low Altitude: ' + min);
-//              Logger.debug('Averaged Altitude: ' + avg);
-
-              thiz.emit('data', avg);
-
-              if (activated) {
-
-                if (armed === false && (avg - initialAltitude >= armAltDelta)) {
-                  armed = true;
-                  thiz.emit('armed');
+              else if (armed === true && deployed !== true) {
+                if (avg > maxAltitude) {
+                  maxAltitude = alt;
+                  Logger.debug('New Max Altitude: ' + alt);
+                  thiz.emit('maxAltitude', {alt: maxAltitude});
                 }
-                else if (armed === true && deployed !== true) {
-                  if (avg > maxAltitude) {
-                    maxAltitude = avg;
-                    thiz.emit('maxAltitude', {alt: maxAltitude});
-                  }
-                  else if (maxAltitude - avg >= deployAltDelta) {
-                    thiz.emit('parachute', {alt: avg});
-                    deployed = true;
-                  }
+                else if (maxAltitude - alt >= deployAltDelta) {
+                  thiz.emit('parachute', {alt: alt});
+                  deployed = true;
                 }
               }
             }
@@ -184,6 +154,74 @@ function Altimeter(opts) {
   this.setServoReleaseAngle = function (angle) {
     this.config.servoReleaseAngle = angle;
   };
+
+  // --- Utility Functions -----------------------------------------------------
+
+  /**
+   * 111.76 is the equivalent of 250 MPH in Meters Per Second
+   * 250 Miles == 402336 Meters
+   * 402336 / 60 (min in hr) = 6705.6
+   * 6705.6 / 60 (sec in min) = 111.76
+   *
+   * @type {number}
+   */
+  var MAX_REALISTIC_SPEED = 111.76 / (1000 / this.config.dataInterval);
+
+  var cnt = 0;
+  var bufferLength = 5;
+  var altitudeBuffer = [];
+  var velocityBuffer = [];
+  var altRollingAvg = 0;
+  var velRollingAvg = 0;
+  var last;
+
+  function normalizeValue(current) {
+//    Logger.debug('Initializing Altitude Normalization Values');
+    for (var i = 0; i < bufferLength; ++i) {
+      altitudeBuffer[i] = current;
+      velocityBuffer[i] = 0;
+    }
+    last = current;
+    altRollingAvg = current;
+    velRollingAvg = 0;
+
+    normalizeValue = normalizeValueFn;
+    var alt = normalizeValue(current);
+    initialAltitude = alt;
+    return alt;
+  }
+
+  function normalizeValueFn(current) {
+//    Logger.debug('Normalizing Value: ' + current);
+    var metersSinceLast = current.alt - last;
+    if (metersSinceLast > MAX_REALISTIC_SPEED) {
+      var mph = (metersSinceLast * 0.000621371) * (1000 / thiz.config.dataInterval) * 60 * 60;
+      Logger.debug('Altimeter value of ' + current.alt + ' is a change of ' + metersSinceLast + '.' +
+        '  That is ' + mph + 'mph.' +
+        '  Substituting ' + (last + velRollingAvg));
+      current = last + velRollingAvg;
+    }
+
+    var index = cnt++ % bufferLength;
+    altitudeBuffer[index] = current;
+    velocityBuffer[index] = current - last;
+    getAverages();
+
+    last = current;
+    return altRollingAvg;
+  }
+
+  function getAverages() {
+    var aSum = 0;
+    var vSum = 0;
+    for (var i = 0; i < bufferLength; ++i) {
+      aSum += altitudeBuffer[0];
+      vSum += velocityBuffer[0];
+    }
+
+    altRollingAvg = aSum / bufferLength;
+    velRollingAvg = vSum / bufferLength;
+  }
 }
 
 Altimeter.prototype.__proto__ = events.EventEmitter.prototype;

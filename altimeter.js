@@ -6,10 +6,13 @@ function Altimeter(opts) {
     this.config = _.extend({
         dataInterval: 100,
         mode: 1,
-        servoInitAngle: 150,
-        servoReleaseAngle: 60,
-        armAltDelta: 3,
-        deployAltDelta: 2
+        servoInitAngle: 60,
+        servoReleaseAngle: 150,
+        armAltDelta: 8,
+        deployAltDelta: 2,
+        testArmAltDelta: 2,
+        testDeployAltDelta: 0.5,
+        autoResetDelay: 30000
     }, opts);
 
   events.EventEmitter.call(this);
@@ -21,13 +24,17 @@ function Altimeter(opts) {
   var maxAltitude = null;
   var altitudeBuffer = [];
   var cnt = 0;
+  var isTestMode = false;
 
   Cylon.robot({
     connection: {name: 'raspi', adaptor: 'raspi'},
     devices: [
-      { name: 'bmp180', driver: 'bmp180' },
-      { name: 'servo', driver: 'servo', pin: 12 },
-      { name: 'statusLed', driver: 'led', pin: 7 }
+      { name: 'bmp180',   driver: 'bmp180' },
+      { name: 'servo',    driver: 'servo',  pin: 12 },
+      { name: 'greenLED', driver: 'led',    pin: 15 },
+      { name: 'blueLED',  driver: 'led',    pin: 18 },
+      { name: 'greenBtn', driver: 'button', pin: 11 },
+      { name: 'blueBtn',  driver: 'button', pin: 16 }
     ],
 
     work: function (my) {
@@ -35,7 +42,49 @@ function Altimeter(opts) {
 
       my.servo.angle(thiz.config.servoInitAngle);
 
-      my.statusLed.turnOn();
+      my.greenLED.turnOn();
+
+      my.blueBtn.on('push', function() {
+        thiz.emit('activate');
+      });
+
+      var btnFn = toggleTestMode;
+
+      my.greenBtn.on('push', function() {
+        btnFn();
+      });
+
+      var flashy;
+      var armAltDelta = thiz.config.armAltDelta;
+      var deployAltDelta = thiz.config.deployAltDelta;
+
+      function toggleTestMode() {
+        isTestMode = !isTestMode;
+        console.log(isTestMode);
+        btnFn = function() {};
+
+        if (isTestMode) thiz.emit('testModeEnabled');
+        else thiz.emit('testModeDisabled');
+
+        my.greenBtn.on('release', function() {
+          btnFn = toggleTestMode;
+        });
+      }
+
+      thiz.on('testModeEnabled', function() {
+        armAltDelta = thiz.config.testArmAltDelta;
+        deployAltDelta = thiz.config.testDeployAltDelta;
+        flashy = setInterval(function() {
+          my.greenLED.toggle();
+        }, 150);
+      });
+
+      thiz.on('testModeDisabled', function() {
+        armAltDelta = thiz.config.armAltDelta;
+        deployAltDelta = thiz.config.deployAltDelta;
+        clearInterval(flashy);
+        my.greenLED.turnOn();
+      });
 
       thiz.on('init', function () {
         Logger.debug('Setting angle to ' + thiz.config.servoInitAngle);
@@ -43,24 +92,38 @@ function Altimeter(opts) {
         activated = false;
         armed = false;
         deployed = false;
-        initialAltitude = null;
-        maxAltitude = null;
+        initialAltitude = 0;
+        maxAltitude = 0;
+
+        my.blueLED.turnOff();
       });
+
       thiz.on('parachute', function () {
         Logger.debug('Setting angle to ' + thiz.config.servoReleaseAngle);
+        my.blueLED.turnOff();
         my.servo.angle(thiz.config.servoReleaseAngle);
+
+        setTimeout(function() {
+          thiz.emit('init');
+        }, thiz.config.autoResetDelay);
       });
+
       thiz.on('activate', function () {
         Logger.debug('Activated');
+        my.blueLED.turnOn();
         activated = true;
       });
+
+      // This doesn't really do anything except notify clients that this has been done;
+      thiz.emit('init');
+
       every(thiz.config.dataInterval, function () {
         my.bmp180.getAltitude(thiz.config.mode, null, function (err, val) {
 
           if(!!err) {
             console.log(err);
           } else {
-            Logger.debug('Raw Alititude: ' + val.alt);
+//            Logger.debug('Raw Alititude: ' + val.alt);
 
             altitudeBuffer[cnt++ % 5] = val.alt;
 
@@ -84,15 +147,15 @@ function Altimeter(opts) {
 
               if (!initialAltitude) initialAltitude = avg;
 
-              Logger.debug('High Altitude: ' + max);
-              Logger.debug('Low Altitude: ' + min);
-              Logger.debug('Averaged Altitude: ' + avg);
+//              Logger.debug('High Altitude: ' + max);
+//              Logger.debug('Low Altitude: ' + min);
+//              Logger.debug('Averaged Altitude: ' + avg);
 
               thiz.emit('data', avg);
 
               if (activated) {
 
-                if (armed === false && (avg - initialAltitude >= thiz.config.armAltDelta)) {
+                if (armed === false && (avg - initialAltitude >= armAltDelta)) {
                   armed = true;
                   thiz.emit('armed');
                 }
@@ -101,7 +164,7 @@ function Altimeter(opts) {
                     maxAltitude = avg;
                     thiz.emit('maxAltitude', {alt: maxAltitude});
                   }
-                  else if (maxAltitude - avg >= thiz.config.deployAltDelta) {
+                  else if (maxAltitude - avg >= deployAltDelta) {
                     thiz.emit('parachute', {alt: avg});
                     deployed = true;
                   }
@@ -116,11 +179,11 @@ function Altimeter(opts) {
 
   this.setServoInitAngle = function (angle) {
     this.config.servoInitAngle = angle;
-  }
+  };
 
   this.setServoReleaseAngle = function (angle) {
     this.config.servoReleaseAngle = angle;
-  }
+  };
 }
 
 Altimeter.prototype.__proto__ = events.EventEmitter.prototype;

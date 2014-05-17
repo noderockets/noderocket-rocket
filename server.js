@@ -30,6 +30,14 @@ io.sockets.on('connection', function (socket) {
     }
 
     // Emit altimeter data
+    altimeter.on('init', function() {
+      socket.emit('reset');
+    });
+
+    altimeter.on('activate', function() {
+      socket.emit('activate');
+    });
+
     altimeter.on('data', function(data) {
       socket.emit('data', data);
     });
@@ -44,6 +52,14 @@ io.sockets.on('connection', function (socket) {
 
     altimeter.on('parachute', function(data) {
       socket.emit('parachute', data);
+    });
+
+    altimeter.on('testModeEnabled', function() {
+      socket.emit('testModeEnabled');
+    });
+
+    altimeter.on('testModeDisabled', function() {
+      socket.emit('testModeDisabled');
     });
   });
 

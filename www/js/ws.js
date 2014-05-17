@@ -10,10 +10,18 @@ socket.on('hello', function(data) {
   });
 });
 
+socket.on('reset', function() {
+  console.log('Reset');
+});
+
+socket.on('activate', function() {
+  console.log('Ready to launch');
+});
+
 socket.on('data', function (data) {
-  console.log('Data', data);
+//  console.log('Data', data);
 //  if(data.alt) addData(data.alt);
-  if(data.alt) addData(data);
+  if(data) addData(data);
 });
 
 socket.on('armed', function () {
@@ -27,6 +35,15 @@ socket.on('maxAltitude', function (data) {
 socket.on('parachute', function (data) {
   console.log('Deploying Parachute at ' + data);
 });
+
+socket.on('testModeEnabled', function () {
+  console.log('Test mode enabled');
+});
+
+socket.on('testModeDisabled', function () {
+  console.log('Test mode disabled');
+});
+
 
 function deployParachute () {
 	socket.emit('parachute');

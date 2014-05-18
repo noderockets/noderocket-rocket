@@ -1,0 +1,36 @@
+#! /bin/bash
+### BEGIN INIT INFO
+# Provides:          mjpg-streamer
+# Required-Start:    $remote_fs $syslog $all
+# Required-Stop:     $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Daemon for MJPG Streamer
+# Description:       This daemon will turn on the camera and stream the images
+#                    on port 8080
+### END INIT INFO
+
+PATH=/sbin:/usr/sbin:/bin:/usr/bin:/usr/local/bin
+NAME=mjpg_streamer
+LOG_FILE=/var/log/mjpg_streamer.log
+DAEMON=/usr/local/bin/$NAME
+SCRIPTNAME=/etc/init.d/$NAME
+
+case "$1" in
+  start)
+    echo "Starting $NAME"
+    # run application you want to start
+    LD_LIBRARY_PATH=/usr/local/lib/ $DAEMON -o "output_http.so -w /usr/local/www" -i "input_raspicam.so -fps 15 -q 50 -x 640 -y 480" >> $LOG_FILE 2>&1 &
+    ;;
+  stop)
+    echo "Stopping $NAME"
+    # kill application you want to stop
+    killall $NAME
+    ;;
+  *)
+    echo "Usage: $SCRIPTNAME {start|stop}"
+    exit 1
+    ;;
+esac
+
+exit 0

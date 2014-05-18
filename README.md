@@ -88,7 +88,7 @@ sudo reboot
 
 __Rocket Software__
 
-Checkout and build the noderocket-rocket project:
+Clone and build the noderocket-rocket project:
 
 ```bash
 git clone https://github.com/noderockets/noderocket-rocket.git
@@ -124,3 +124,38 @@ sudo update-rc.d rocket defaults
 
 3. If you didn't clone the rocket project to /home/pi/noderocket-rocket, edit /etc/init.d/rocket and point ROCKET_HOME to the correct path.
 
+__Configuring the Camera__
+
+1. Enable the camera by running:
+
+  ```bash
+sudo raspi-config
+  ```
+  
+  Follow the menu to enable the camera, then finish.
+  
+2. Reboot the Pi.
+3. Install some packages:
+
+  ```bash
+sudo apt-get install libjpeg62-dev
+sudo apt-get install cmake
+  ```
+  
+4. Clone and build the MJPG Streamer project.  This is an experimental version that uses the raspicam input plugin.
+
+  ```bash
+git clone https://github.com/jacksonliam/mjpg-streamer.git
+cd mjpg-streamer
+sudo make install
+  ```
+
+5. Run the streamer with this command:
+
+  ```bash
+mjpg_streamer -o "output_http.so -w /usr/local/www" -i "input_raspicam.so -fps 15 -q 50 -x 640 -y 480"
+  ```
+  
+  This will run the streamer with a frame rate of 15 and an image size of 640x480.  This gives a pretty good result with low load on the Pi.  You can look up the other input options at https://github.com/jacksonliam/mjpg-streamer.
+  
+6. Open the streamer in your browser at the Pi's address, port 8080 - http://pi_address:8080

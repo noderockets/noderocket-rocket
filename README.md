@@ -12,7 +12,7 @@ This project uses a Raspberry Pi in a soda bottle water rocket to do the followi
 
 Preconfigured Image
 -------------------
-We have an SD card image all ready for you that has all of this pre-configured.  You can download it at http://download.me.
+We have an SD card image all ready for you that has all of this pre-configured.  [Download it here.](https://drive.google.com/file/d/0B9i9Cc4UepPoMnA3eHNDdHVRdUE/edit?usp=sharing)
 
 You need an SD card that's at least 4GB.  Install the image to your SD card using [the Raspbian installation instructions.](http://www.raspberrypi.org/documentation/installation/installing-images/README.md)
 

@@ -159,3 +159,14 @@ mjpg_streamer -o "output_http.so -w /usr/local/www" -i "input_raspicam.so -fps 1
   This will run the streamer with a frame rate of 15 and an image size of 640x480.  This gives a pretty good result with low load on the Pi.  You can look up the other input options at https://github.com/jacksonliam/mjpg-streamer.
   
 6. Open the streamer in your browser at the Pi's address, port 8080 - http://pi_address:8080
+
+_Make the camera software run automatically_
+
+1. Copy and install the init.d script to start and stop the camera:
+
+  ```bash
+sudo cp etc/mjpg_streamer /etc/init.d
+sudo chmod +x /etc/init.d/mjpg_streamer
+sudo update-rc.d mjpg_streamer defaults
+  ```
+  

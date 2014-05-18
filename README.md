@@ -14,7 +14,7 @@ Preconfigured Image
 -------------------
 We have an SD card image all ready for you that has all of this pre-configured.  You can download it at http://download.me.
 
-The following instructions will help you create your very own SD card from scratch.
+You need an SD card that's at least 4GB.  Install the image to your SD card using [the Raspbian installation instructions.](http://www.raspberrypi.org/documentation/installation/installing-images/README.md)
 
 Making Your Own
 ---------------

@@ -16,6 +16,8 @@ We have an SD card image all ready for you that has all of this pre-configured. 
 
 You need an SD card that's at least 4GB.  Install the image to your SD card using [the Raspbian installation instructions.](http://www.raspberrypi.org/documentation/installation/installing-images/README.md)
 
+This image is configured to run the rocket and the camera software automatically on bootup.
+
 Making Your Own
 ---------------
 

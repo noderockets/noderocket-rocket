@@ -21,7 +21,7 @@ Making Your Own
 
 __Install Raspbian__
 
-1. You need an SD card that's at least 2GB.
+1. You need an SD card that's at least 4GB.
 2. Download the base Raspbian distribution from http://www.raspberrypi.org/downloads/
 3. Install Raspbian to your SD card using [these instructions](http://www.raspberrypi.org/documentation/installation/installing-images/README.md)
 4. Put the card in your Raspberry Pi.

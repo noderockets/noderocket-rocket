@@ -164,10 +164,10 @@ mjpg_streamer -o "output_http.so -w /usr/local/www" -i "input_raspicam.so -fps 1
 
 _Make the camera software run automatically_
 
-1. Copy and install the init.d script to start and stop the camera:
+1. Copy and install the mjpg_streamer init.d script from the noderocket-rocket project to start and stop the camera:
 
   ```bash
-sudo cp etc/mjpg_streamer /etc/init.d
+sudo cp ~/noderocket-rocket/etc/mjpg_streamer /etc/init.d
 sudo chmod +x /etc/init.d/mjpg_streamer
 sudo update-rc.d mjpg_streamer defaults
   ```

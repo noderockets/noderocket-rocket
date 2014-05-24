@@ -1,9 +1,7 @@
 /* jshint strict:false */
 /* global io, rocketInfo, console */
 
-var _URL;
-var _URL = 'http://192.168.1.234';
-var socket = io.connect(_URL);
+var socket = io.connect();
 
 var chartEl = document.querySelector('#chart');
 var logEl = document.querySelector('#msgs');

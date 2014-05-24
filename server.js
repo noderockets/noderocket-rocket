@@ -28,7 +28,7 @@ io.sockets.on('connection', function (socket) {
     altimeter.on('init', function(data) {
       socket.emit('reset', {
         alt: data,
-        time: new Date()
+        time: +new Date()
       });
     });
 
@@ -39,28 +39,28 @@ io.sockets.on('connection', function (socket) {
     altimeter.on('data', function(data) {
       socket.emit('data', {
         alt: data,
-        time: new Date()
+        time: +new Date()
       });
     });
 
     altimeter.on('armed', function(data) {
       socket.emit('armed', {
         alt: data,
-        time: new Date()
+        time: +new Date()
       });
     });
 
     altimeter.on('maxAltitude', function(data) {
       socket.emit('maxAltitude', {
         alt: data,
-        time: new Date()
+        time: +new Date()
       });
     });
 
     altimeter.on('parachute', function(data) {
       socket.emit('parachute', {
         alt: data,
-        time: new Date()
+        time: +new Date()
       });
     });
 

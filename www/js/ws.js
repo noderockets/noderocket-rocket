@@ -43,7 +43,7 @@ socket.on('hello', function() {
 });
 
 socket.on('reset', function(data) {
-  info.log.append('Reset: ' + data.alt, data.time);
+  info.log.append('Reset: ' + data.alt, new Date(data.time));
   if (!pauseFlag && data.alt !== undefined) info.chart.baseAlt(data.alt);
 });
 
@@ -53,23 +53,23 @@ socket.on('activate', function() {
 
 socket.on('data', function (data) {
   if (!pauseFlag && data) {
-    info.chart.addData(data.alt, data.time);
+    info.chart.addData(data.alt, new Date(data.time));
   }
 });
 
 socket.on('armed', function (data) {
-  info.log.append('Parachute Armed', data.time);
-  if (!pauseFlag) info.chart.addMessage(data.alt, data.time, 'Armed');
+  info.log.append('Parachute Armed', new Date(data.time));
+  if (!pauseFlag) info.chart.addMessage(data.alt, new Date(data.time), 'Armed');
 });
 
 socket.on('maxAltitude', function (data) {
-  info.log.append('Max Altitude: ' + data.alt, data.time);
-  if (!pauseFlag) info.chart.addMessage(data.alt, data.time, 'Apogee');
+  info.log.append('Max Altitude: ' + data.alt, new Date(data.time));
+  if (!pauseFlag) info.chart.addMessage(data.alt, new Date(data.time), 'Apogee');
 });
 
 socket.on('parachute', function (data) {
-  info.log.append('Deploying Parachute at: ' + data.alt, data.time);
-  if (!pauseFlag) info.chart.addMessage(data.alt, data.time, 'Parachute');
+  info.log.append('Deploying Parachute at: ' + data.alt, new Date(data.time));
+  if (!pauseFlag) info.chart.addMessage(data.alt, new Date(data.time), 'Parachute');
 });
 
 socket.on('testModeEnabled', function () {

@@ -52,7 +52,7 @@ socket.on('activate', function() {
 });
 
 socket.on('data', function (data) {
-  if (!pauseFlag && data) {
+  if (!pauseFlag && data && data.alt) {
     info.chart.addData(data.alt, new Date(data.time));
   }
 });

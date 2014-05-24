@@ -1,7 +1,7 @@
 /* jshint strict:false */
 /* global io, rocketInfo */
 
-var socket = io.connect();
+var socket = {}//io.connect();
 
 var chartEl = document.querySelector('#chart');
 var logEl = document.querySelector('#msgs');
@@ -15,6 +15,9 @@ var info = rocketInfo(chartEl, logEl);
 
 // info.log.append(message, time);
 // info.log.clear();
+
+var vid_url = 'http://' + window.location.hostname + ':8080/?action=stream';
+document.querySelector('#preview img').src = vid_url;
 
 document.querySelector('#log a').addEventListener('click', info.log.clear);
 document.querySelector('#chart .reset').addEventListener('click', info.chart.reset);
@@ -38,9 +41,7 @@ socket.on('ready', function (data) {
 
 socket.on('hello', function(data) {
   info.log.append('Hello, Rocket!', new Date());
-  socket.emit('start', {
-    dataInterval: 100
-  });
+  socket.emit('start', {});
 });
 
 socket.on('reset', function(data) {

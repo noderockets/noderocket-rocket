@@ -97,6 +97,8 @@ function Altimeter(opts) {
         maxAltitude = 0;
 
         my.blueLED.turnOff();
+
+        thiz.emit('init', initialAltitude)
       });
 
       thiz.on('armed', function() {

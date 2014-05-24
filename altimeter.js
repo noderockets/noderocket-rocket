@@ -1,3 +1,6 @@
+/* jshint node:true, strict:false */
+/* global Logger, every */
+
 var Cylon = require('cylon');
 var events = require('events');
 var _ = require('underscore');
@@ -22,6 +25,7 @@ function Altimeter(opts) {
   var deployed = false;
   var initialAltitude = null;
   var maxAltitude = null;
+  var lastAltitude;
   var isTestMode = false;
 
   Cylon.robot({
@@ -98,7 +102,7 @@ function Altimeter(opts) {
 
         my.blueLED.turnOff();
 
-        thiz.emit('init', initialAltitude)
+        thiz.emit('init', initialAltitude);
       });
 
       thiz.on('armed', function() {
@@ -109,6 +113,7 @@ function Altimeter(opts) {
         Logger.debug('[[[PARACHUTE]]]: set angle to ' + thiz.config.servoReleaseAngle);
         my.blueLED.turnOff();
         my.servo.angle(thiz.config.servoReleaseAngle);
+        thiz.emit('parachute', {alt: lastAltitude});
 
         setTimeout(
           function() {
@@ -132,6 +137,7 @@ function Altimeter(opts) {
           if (!!err) Logger.error(err);
           else {
             var alt = normalizeValue(values.alt);
+            lastAltitude = alt;
             thiz.emit('data', alt);
 
             if (activated) {

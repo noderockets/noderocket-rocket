@@ -1,3 +1,4 @@
+/* jshint node:true, strict:false, laxcomma:true */
 var express = require('express');
 var app = express()
   , server = require('http').createServer(app)
@@ -7,7 +8,7 @@ io.set('log level', 1);
 
 var Altimeter = require('./altimeter');
 
-var altimeter;
+var altimeter = new Altimeter({});
 
 app.use(express.static(__dirname + '/www'));
 
@@ -24,12 +25,6 @@ io.sockets.on('connection', function (socket) {
   socket.on('start', function(data) {
     console.log(data);
 
-    // Initialize altimeter if not already
-    if(!altimeter) {
-      altimeter = new Altimeter(data);
-    }
-
-    // Emit altimeter data
     altimeter.on('init', function(data) {
       socket.emit('reset', data);
     });

@@ -27,26 +27,24 @@ document.querySelector('#reset').addEventListener('click', reset);
 document.querySelector('#activate').addEventListener('click', activate);
 document.querySelector('#parachute').addEventListener('click', deployParachute);
 
-var recentAlt = 0;
-
 var pauseFlag = false;
 function pauseResume() {
   pauseFlag = !pauseFlag;
   document.querySelector('#chart .pause').innerText = pauseFlag ? 'Resume' : 'Pause';
 }
 
-socket.on('ready', function (data) {
+socket.on('ready', function () {
   info.log.append('Launcher Ready!', new Date());
 });
 
-socket.on('hello', function(data) {
+socket.on('hello', function() {
   info.log.append('Hello, Rocket!', new Date());
   socket.emit('start', {});
 });
 
 socket.on('reset', function(data) {
-  info.log.append('Reset: ' + data, new Date());
-  if (!pauseFlag && data !== undefined) info.chart.baseAlt(data);
+  info.log.append('Reset: ' + data.alt, data.time);
+  if (!pauseFlag && data.alt !== undefined) info.chart.baseAlt(data.alt);
 });
 
 socket.on('activate', function() {
@@ -55,24 +53,23 @@ socket.on('activate', function() {
 
 socket.on('data', function (data) {
   if (!pauseFlag && data) {
-    info.chart.addData(data, new Date());
-    recentAlt = data;
+    info.chart.addData(data.alt, data.time);
   }
 });
 
-socket.on('armed', function () {
-  info.log.append('Parachute Armed', new Date());
-  if (!pauseFlag) info.chart.addMessage(recentAlt, new Date(), 'Armed');
+socket.on('armed', function (data) {
+  info.log.append('Parachute Armed', data.time);
+  if (!pauseFlag) info.chart.addMessage(data.alt, data.time, 'Armed');
 });
 
 socket.on('maxAltitude', function (data) {
-  info.log.append('Max Altitude: ' + data, new Date());
-  if (!pauseFlag) info.chart.addMessage(data, new Date(), 'Apogee');
+  info.log.append('Max Altitude: ' + data.alt, data.time);
+  if (!pauseFlag) info.chart.addMessage(data.alt, data.time, 'Apogee');
 });
 
 socket.on('parachute', function (data) {
-  info.log.append('Deploying Parachute at: ' + data.alt, new Date());
-  if (!pauseFlag) info.chart.addMessage(data.alt, new Date(), 'Parachute');
+  info.log.append('Deploying Parachute at: ' + data.alt, data.time);
+  if (!pauseFlag) info.chart.addMessage(data.alt, data.time, 'Parachute');
 });
 
 socket.on('testModeEnabled', function () {

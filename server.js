@@ -22,11 +22,14 @@ app.get('/', function (req, res) {
 io.sockets.on('connection', function (socket) {
   socket.emit('hello');
 
-  socket.on('start', function(data) {
-    console.log(data);
+  socket.on('start', function() {
+    console.log('Client Started!');
 
     altimeter.on('init', function(data) {
-      socket.emit('reset', data);
+      socket.emit('reset', {
+        alt: data,
+        time: new Date()
+      });
     });
 
     altimeter.on('activate', function() {
@@ -34,19 +37,31 @@ io.sockets.on('connection', function (socket) {
     });
 
     altimeter.on('data', function(data) {
-      socket.emit('data', data);
+      socket.emit('data', {
+        alt: data,
+        time: new Date()
+      });
     });
 
-    altimeter.on('armed', function() {
-      socket.emit('armed');
+    altimeter.on('armed', function(data) {
+      socket.emit('armed', {
+        alt: data,
+        time: new Date()
+      });
     });
 
     altimeter.on('maxAltitude', function(data) {
-      socket.emit('maxAltitude', data);
+      socket.emit('maxAltitude', {
+        alt: data,
+        time: new Date()
+      });
     });
 
     altimeter.on('parachute', function(data) {
-      socket.emit('parachute', data);
+      socket.emit('parachute', {
+        alt: data,
+        time: new Date()
+      });
     });
 
     altimeter.on('testModeEnabled', function() {

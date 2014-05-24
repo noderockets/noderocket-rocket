@@ -113,7 +113,7 @@ function Altimeter(opts) {
         Logger.debug('[[[PARACHUTE]]]: set angle to ' + thiz.config.servoReleaseAngle);
         my.blueLED.turnOff();
         my.servo.angle(thiz.config.servoReleaseAngle);
-        thiz.emit('parachute', {alt: lastAltitude});
+        thiz.emit('parachute', lastAltitude);
 
         setTimeout(
           function() {
@@ -149,7 +149,7 @@ function Altimeter(opts) {
 
               if (armed === false && (alt - initialAltitude >= armAltDelta)) {
                 armed = true;
-                thiz.emit('armed');
+                thiz.emit('armed', alt);
               }
               else if (armed === true && deployed !== true) {
                 if (alt > maxAltitude) {
@@ -159,7 +159,7 @@ function Altimeter(opts) {
                 }
                 else if (maxAltitude - alt >= deployAltDelta) {
                   Logger.debug('Losing Altitude: ' + alt + ' down: ' + (maxAltitude - alt));
-                  thiz.emit('parachute', {alt: alt});
+                  thiz.emit('parachute', alt);
                   deployed = true;
                 }
               }

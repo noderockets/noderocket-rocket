@@ -38,9 +38,10 @@ socket.on('hello', function(data) {
   });
 });
 
-socket.on('reset', function() {
+socket.on('reset', function(data) {
   console.log('Reset');
   info.log.append('Reset', new Date());
+  if (data !== undefined) info.chart.baseAlt(data);
 });
 
 socket.on('activate', function() {

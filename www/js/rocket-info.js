@@ -53,8 +53,6 @@ function rocketInfo(chartEl, logEl) {
       y: alt
     };
     data.push(obj);
-    var minAlt = d3.min(data, function (d) { return d.y; });
-    chart.setAlt(minAlt);
     chart.update(data, points);
   }
 

@@ -57,6 +57,15 @@ function rocketInfo(chartEl, logEl) {
   }
 
   function addMessage(alt, time, msg) {
+    if (msg === 'Apogee') {
+      for (var i = 0; i < points.length; ++i) {
+        if (points[i].msg === 'Apogee') {
+          points.splice(i, 1);
+          break;
+        }
+      }
+    }
+
     var obj = {
       x: time / 1000,
       y: alt,

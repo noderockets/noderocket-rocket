@@ -67,6 +67,7 @@ socket.on('armed', function () {
 
 socket.on('maxAltitude', function (data) {
   info.log.append('Max Altitude: ' + data, new Date());
+  info.chart.addMessage(data, new Date(), 'Apogee');
 });
 
 socket.on('parachute', function (data) {

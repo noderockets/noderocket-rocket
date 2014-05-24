@@ -141,7 +141,7 @@ function Altimeter(opts) {
               if (alt > maxAltitude) {
                 Logger.debug('New Max Altitude: ' + alt + ' up: ' + (alt - initialAltitude));
                 maxAltitude = alt;
-                thiz.emit('maxAltitude', alt);
+                thiz.emit('gotMaxAltitude', alt);
               }
 
               if (armed === false && (alt - initialAltitude >= armAltDelta)) {

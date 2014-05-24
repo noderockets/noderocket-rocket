@@ -68,6 +68,13 @@ io.sockets.on('connection', function (socket) {
       });
     });
 
+    altimeter.on('gotMaxAltitude', function(data) {
+      socket.emit('maxAltitude', {
+        alt: data,
+        time: +new Date()
+      });
+    });
+
     altimeter.on('parachute', function(data) {
       socket.emit('parachute', {
         alt: data,

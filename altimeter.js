@@ -36,6 +36,7 @@ function Altimeter(opts) {
     ],
 
     work: function (my) {
+      Logger.debug(thiz.config);
       Logger.debug('Setting angle to ' + thiz.config.servoInitAngle);
 
       my.servo.angle(thiz.config.servoInitAngle);
@@ -91,10 +92,15 @@ function Altimeter(opts) {
         activated = false;
         armed = false;
         deployed = false;
-        initialAltitude = 0;
+        initialAltitude = altRollingAvg;
+        Logger.debug('Zeroed altitude at ' + initialAltitude);
         maxAltitude = 0;
 
         my.blueLED.turnOff();
+      });
+
+      thiz.on('armed', function() {
+        Logger.debug('[[ARMED]]: at altitude: ' + maxAltitude + ' up: ' + (maxAltitude - initialAltitude));
       });
 
       thiz.on('parachute', function () {
@@ -124,18 +130,23 @@ function Altimeter(opts) {
             thiz.emit('data', alt);
 
             if (activated) {
+              if (alt > maxAltitude) {
+                Logger.debug('New Max Altitude: ' + alt + ' up: ' + (alt - initialAltitude));
+                maxAltitude = alt;
+              }
 
               if (armed === false && (alt - initialAltitude >= armAltDelta)) {
                 armed = true;
                 thiz.emit('armed');
               }
               else if (armed === true && deployed !== true) {
-                if (avg > maxAltitude) {
+                if (alt > maxAltitude) {
                   maxAltitude = alt;
-                  Logger.debug('New Max Altitude: ' + alt);
+                  Logger.debug('New Max Altitude: ' + alt + ' up: ' + (alt - initialAltitude));
                   thiz.emit('maxAltitude', {alt: maxAltitude});
                 }
                 else if (maxAltitude - alt >= deployAltDelta) {
+                  Logger.debug('Losing Altitude: ' + alt + ' down: ' + (maxAltitude - alt));
                   thiz.emit('parachute', {alt: alt});
                   deployed = true;
                 }
@@ -187,7 +198,10 @@ function Altimeter(opts) {
 
     normalizeValue = normalizeValueFn;
     var alt = normalizeValue(current);
+
     initialAltitude = alt;
+    Logger.debug('Zeroed altitude at ' + initialAltitude);
+
     return alt;
   }
 
@@ -195,9 +209,12 @@ function Altimeter(opts) {
 //    Logger.debug('Normalizing Value: ' + current);
     var metersSinceLast = current.alt - last;
     if (metersSinceLast > MAX_REALISTIC_SPEED) {
+      Logger.debug('Current alt: ' + current.alt);
+      Logger.debug('Last alt: ' + last);
       var mph = (metersSinceLast * 0.000621371) * (1000 / thiz.config.dataInterval) * 60 * 60;
+      Logger.debug('mph: ' + mph);
       Logger.debug('Altimeter value of ' + current.alt + ' is a change of ' + metersSinceLast + '.' +
-        '  That is ' + mph + 'mph.' +
+        '  That is ' + mph + 'mph!' +
         '  Substituting ' + (last + velRollingAvg));
       current = last + velRollingAvg;
     }

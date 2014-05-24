@@ -75,6 +75,13 @@ io.sockets.on('connection', function (socket) {
       });
     });
 
+    altimeter.on('parachuteDeployed', function(data) {
+      socket.emit('parachute', {
+        alt: data,
+        time: +new Date()
+      });
+    });
+
     altimeter.on('testModeEnabled', function() {
       socket.emit('testModeEnabled');
     });

@@ -110,7 +110,7 @@ function Altimeter(opts) {
         Logger.debug('[[[PARACHUTE]]]: set angle to ' + thiz.config.servoReleaseAngle);
         my.blueLED.turnOff();
         my.servo.angle(thiz.config.servoReleaseAngle);
-        thiz.emit('parachute', lastAltitude);
+        thiz.emit('parachuteDeployed', lastAltitude);
 
         setTimeout(
           function() {

@@ -8,7 +8,7 @@ io.set('log level', 1);
 
 var Altimeter = require('./altimeter');
 
-var altimeter = new Altimeter({});
+var altimeter;
 
 app.use(express.static(__dirname + '/www'));
 
@@ -24,6 +24,10 @@ io.sockets.on('connection', function (socket) {
 
   socket.on('start', function() {
     console.log('Client Started!');
+
+    if(!altimeter) {
+      altimeter = new Altimeter({});
+    }
 
     altimeter.on('init', function(data) {
       socket.emit('reset', {

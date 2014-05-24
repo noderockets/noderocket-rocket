@@ -36,6 +36,13 @@ io.sockets.on('connection', function (socket) {
       });
     });
 
+    altimeter.on('reset', function(data) {
+      socket.emit('reset', {
+        alt: data,
+        time: +new Date()
+      });
+    });
+
     altimeter.on('activate', function() {
       socket.emit('activate');
     });

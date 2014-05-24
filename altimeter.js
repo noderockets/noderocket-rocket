@@ -1,6 +1,3 @@
-/* jshint node:true, strict:false */
-/* global Logger, every */
-
 var Cylon = require('cylon');
 var events = require('events');
 var _ = require('underscore');
@@ -102,7 +99,7 @@ function Altimeter(opts) {
 
         my.blueLED.turnOff();
 
-        thiz.emit('init', initialAltitude);
+        thiz.emit('reset', initialAltitude);
       });
 
       thiz.on('armed', function() {

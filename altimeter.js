@@ -9,8 +9,8 @@ function Altimeter(opts) {
     this.config = _.extend({
         dataInterval: 100,
         mode: 1,
-        servoInitAngle: 60,
-        servoReleaseAngle: 150,
+        servoInitAngle: 150,
+        servoReleaseAngle: 65,
         armAltDelta: 8,
         deployAltDelta: 2,
         testArmAltDelta: 2,

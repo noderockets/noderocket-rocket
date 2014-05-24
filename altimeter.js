@@ -203,6 +203,7 @@ function Altimeter(opts) {
     var alt = normalizeValue(current);
 
     initialAltitude = alt;
+    thiz.emit('init', alt);
     Logger.debug('Zeroed altitude at ' + initialAltitude);
 
     return alt;
@@ -235,8 +236,8 @@ function Altimeter(opts) {
     var aSum = 0;
     var vSum = 0;
     for (var i = 0; i < bufferLength; ++i) {
-      aSum += altitudeBuffer[0];
-      vSum += velocityBuffer[0];
+      aSum += altitudeBuffer[i];
+      vSum += velocityBuffer[i];
     }
 
     altRollingAvg = aSum / bufferLength;

@@ -48,7 +48,7 @@ socket.on('activate', function() {
 socket.on('data', function (data) {
   if (data) {
     info.chart.addData(data, new Date());
-    recentAlt = data.alt;
+    recentAlt = data;
   }
 });
 
@@ -62,7 +62,7 @@ socket.on('maxAltitude', function (data) {
 });
 
 socket.on('parachute', function (data) {
-  info.log.append('Deploying Parachute at ' + data, new Date());
+  info.log.append('Deploying Parachute at: ' + data.alt, new Date());
   info.chart.addMessage(data.alt, new Date(), 'Parachute');
 });
 

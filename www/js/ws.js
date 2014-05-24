@@ -1,7 +1,7 @@
 /* jshint strict:false */
 /* global io, rocketInfo */
 
-var socket = {}//io.connect();
+var socket = io.connect();
 
 var chartEl = document.querySelector('#chart');
 var logEl = document.querySelector('#msgs');
@@ -67,7 +67,7 @@ socket.on('armed', function () {
 
 socket.on('maxAltitude', function (data) {
   info.log.append('Max Altitude: ' + data, new Date());
-  info.chart.addMessage(data, new Date(), 'Apogee');
+  if (!pauseFlag) info.chart.addMessage(data, new Date(), 'Apogee');
 });
 
 socket.on('parachute', function (data) {

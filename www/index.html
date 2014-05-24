@@ -5,9 +5,15 @@
     <link rel="stylesheet" href="css/rocket.css">
   </head>
   <body>
+    <div id="buttons">
+      <div class="button" id="reset"><div class="outer"><div class="height"><div class="inner">Reset</div></div></div></div>
+      <div class="button" id="activate"><div class="outer"><div class="height"><div class="inner">Activate</div></div></div></div>
+      <div class="button" id="parachute"><div class="outer"><div class="height"><div class="inner">Parachute</div></div></div></div>
+    </div>
     <div id="container">
       <div id="chart">
-        <div class="a-cont"><a>Reset</a></div>
+        <div class="a-cont"><a class="reset">Reset</a></div>
+        <div class="a-cont"><a class="pause">Pause</a></div>
       </div>
 
       <div id="log">
@@ -22,10 +28,6 @@
         <img src="#" style="width:640px;height:480px">
       </div> -->
     </div>
-
-    <div class="button" id="reset"><div class="outer"><div class="height"><div class="inner">Reset</div></div></div></div>
-    <div class="button" id="activate"><div class="outer"><div class="height"><div class="inner">Activate</div></div></div></div>
-    <div class="button" id="parachute"><div class="outer"><div class="height"><div class="inner">Parachute</div></div></div></div>
 
     <script type="text/javascript" src="/socket.io/socket.io.js"></script>
     <script type="text/javascript" src="js/lib/d3.min.js"></script>

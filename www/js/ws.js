@@ -17,13 +17,20 @@ var info = rocketInfo(chartEl, logEl);
 // info.log.clear();
 
 document.querySelector('#log a').addEventListener('click', info.log.clear);
-document.querySelector('#chart a').addEventListener('click', info.chart.reset);
+document.querySelector('#chart .reset').addEventListener('click', info.chart.reset);
+document.querySelector('#chart .pause').addEventListener('click', pauseResume);
 
 document.querySelector('#reset').addEventListener('click', reset);
 document.querySelector('#activate').addEventListener('click', activate);
 document.querySelector('#parachute').addEventListener('click', deployParachute);
 
 var recentAlt = 0;
+
+var pauseFlag = false;
+function pauseResume() {
+  pauseFlag = !pauseFlag;
+  document.querySelector('#chart .pause').innerText = pauseFlag ? 'Resume' : 'Pause';
+}
 
 socket.on('ready', function (data) {
   info.log.append('Launcher Ready!', new Date());
@@ -38,7 +45,7 @@ socket.on('hello', function(data) {
 
 socket.on('reset', function(data) {
   info.log.append('Reset: ' + data, new Date());
-  if (data !== undefined) info.chart.baseAlt(data);
+  if (!pauseFlag && data !== undefined) info.chart.baseAlt(data);
 });
 
 socket.on('activate', function() {
@@ -46,7 +53,7 @@ socket.on('activate', function() {
 });
 
 socket.on('data', function (data) {
-  if (data) {
+  if (!pauseFlag && data) {
     info.chart.addData(data, new Date());
     recentAlt = data;
   }
@@ -54,7 +61,7 @@ socket.on('data', function (data) {
 
 socket.on('armed', function () {
   info.log.append('Parachute Armed', new Date());
-  info.chart.addMessage(recentAlt, new Date(), 'Armed');
+  if (!pauseFlag) info.chart.addMessage(recentAlt, new Date(), 'Armed');
 });
 
 socket.on('maxAltitude', function (data) {
@@ -63,7 +70,7 @@ socket.on('maxAltitude', function (data) {
 
 socket.on('parachute', function (data) {
   info.log.append('Deploying Parachute at: ' + data.alt, new Date());
-  info.chart.addMessage(data.alt, new Date(), 'Parachute');
+  if (!pauseFlag) info.chart.addMessage(data.alt, new Date(), 'Parachute');
 });
 
 socket.on('testModeEnabled', function () {

@@ -40,6 +40,9 @@ body {
 #log a:hover {
     color: lightblue;
 }
+#chart .pause {
+    margin-top: 60px;
+}
 
 .a-cont {
     position: absolute;
@@ -63,12 +66,17 @@ body {
 }
 
 
-
+#buttons {
+    height: 150px;
+    text-align: center;
+}
 .button {
     height: 80px;
     width: 180px;
     cursor: pointer;
-    margin: 20px auto;
+    margin: 20px;
+    display: inline-block;
+    vertical-align: top;
 }
 .button .outer {
     position: relative;

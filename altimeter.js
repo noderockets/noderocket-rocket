@@ -108,9 +108,12 @@ function Altimeter(opts) {
         my.blueLED.turnOff();
         my.servo.angle(thiz.config.servoReleaseAngle);
 
-        setTimeout(function() {
-          thiz.emit('init');
-        }, thiz.config.autoResetDelay);
+        setTimeout(
+          function() {
+            thiz.emit('init', initialAltitude);
+          },
+          thiz.config.autoResetDelay
+        );
       });
 
       thiz.on('activate', function () {
@@ -120,7 +123,7 @@ function Altimeter(opts) {
       });
 
       // This doesn't really do anything except notify clients that this has been done;
-      thiz.emit('init');
+      thiz.emit('init', initialAltitude);
 
       every(thiz.config.dataInterval, function () {
         my.bmp180.getAltitude(thiz.config.mode, null, function (err, values) {

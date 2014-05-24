@@ -30,8 +30,8 @@ io.sockets.on('connection', function (socket) {
     }
 
     // Emit altimeter data
-    altimeter.on('init', function() {
-      socket.emit('reset');
+    altimeter.on('init', function(data) {
+      socket.emit('reset', data);
     });
 
     altimeter.on('activate', function() {

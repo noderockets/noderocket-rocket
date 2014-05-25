@@ -63,7 +63,7 @@ socket.on('armed', function (data) {
 });
 
 socket.on('maxAltitude', function (data) {
-  info.log.append('Max Altitude: ' + data.alt, new Date(data.time));
+  // info.log.append('Max Altitude: ' + data.alt, new Date(data.time));
   if (!pauseFlag) info.chart.addMessage(data.alt, new Date(data.time), 'Apogee');
 });
 

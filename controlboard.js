@@ -10,6 +10,8 @@ function Altimeter(opts) {
         servoReleaseAngle: 65,
         armAltDelta: 8,
         deployAltDelta: 2,
+        testArmAltDelta: 2,
+        testDeployAltDelta: 0.5,
         autoResetDelay: 30000
     }, opts);
 
@@ -21,13 +23,17 @@ function Altimeter(opts) {
   var initialAltitude = null;
   var maxAltitude = null;
   var lastAltitude;
+  var isTestMode = false;
 
   Cylon.robot({
     connection: {name: 'raspi', adaptor: 'raspi'},
     devices: [
       { name: 'bmp180',   driver: 'bmp180' },
       { name: 'servo',    driver: 'servo',  pin: 12 },
-      { name: 'statusLed', driver: 'led',    pin: 15 }
+      { name: 'greenLED', driver: 'led',    pin: 15 },
+      { name: 'blueLED',  driver: 'led',    pin: 18 },
+      { name: 'greenBtn', driver: 'button', pin: 11 },
+      { name: 'blueBtn',  driver: 'button', pin: 16 }
     ],
 
     work: function (my) {
@@ -36,10 +42,50 @@ function Altimeter(opts) {
 
       my.servo.angle(thiz.config.servoInitAngle);
 
-      my.statusLed.turnOn();
+      my.greenLED.turnOn();
 
+      my.blueBtn.on('push', function() {
+        thiz.emit('activate');
+      });
+
+      var btnFn = toggleTestMode;
+
+      my.greenBtn.on('push', function() {
+        btnFn();
+      });
+
+      var flashy;
       var armAltDelta = thiz.config.armAltDelta;
       var deployAltDelta = thiz.config.deployAltDelta;
+
+      function toggleTestMode() {
+        isTestMode = !isTestMode;
+        btnFn = function() {};
+
+        if (isTestMode) thiz.emit('testModeEnabled');
+        else thiz.emit('testModeDisabled');
+
+        my.greenBtn.on('release', function() {
+          btnFn = toggleTestMode;
+        });
+      }
+
+      thiz.on('testModeEnabled', function() {
+        Logger.debug('Enable Test Mode');
+        armAltDelta = thiz.config.testArmAltDelta;
+        deployAltDelta = thiz.config.testDeployAltDelta;
+        flashy = setInterval(function() {
+          my.greenLED.toggle();
+        }, 150);
+      });
+
+      thiz.on('testModeDisabled', function() {
+        Logger.debug('Disable Test Mode');
+        armAltDelta = thiz.config.armAltDelta;
+        deployAltDelta = thiz.config.deployAltDelta;
+        clearInterval(flashy);
+        my.greenLED.turnOn();
+      });
 
       thiz.on('init', function () {
         Logger.debug('Initializing angle to ' + thiz.config.servoInitAngle);
@@ -51,6 +97,8 @@ function Altimeter(opts) {
         Logger.debug('Zeroed altitude at ' + initialAltitude);
         maxAltitude = 0;
 
+        my.blueLED.turnOff();
+
         thiz.emit('reset', initialAltitude);
       });
 
@@ -60,6 +108,7 @@ function Altimeter(opts) {
 
       thiz.on('parachute', function () {
         Logger.debug('[[[PARACHUTE]]]: set angle to ' + thiz.config.servoReleaseAngle);
+        my.blueLED.turnOff();
         my.servo.angle(thiz.config.servoReleaseAngle);
         thiz.emit('parachuteDeployed', lastAltitude);
 
@@ -73,6 +122,7 @@ function Altimeter(opts) {
 
       thiz.on('activate', function () {
         Logger.debug('Activated');
+        my.blueLED.turnOn();
         activated = true;
       });
 

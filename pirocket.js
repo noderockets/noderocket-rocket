@@ -10,7 +10,8 @@ function Rocket(opts) {
     dataInterval: 100,
     mode: 1,
     servoInitAngle: 150,
-    servoReleaseAngle: 65
+    servoReleaseAngle: 65,
+    launchThreshold: 4
   }, opts);
 
   var thiz = this;
@@ -60,7 +61,7 @@ function Rocket(opts) {
               altBuffer.push(values.alt);
               if (altBuffer.length > 10) {
                 altBuffer = altBuffer.slice(-10);
-                if (altBuffer[9] - altBuffer[0] > 2) {
+                if (altBuffer[9] - altBuffer[0] > config.launchThreshold) {
                   data.launched = true;
                   thiz.emit('launch');
                 }

@@ -2,8 +2,7 @@
 var express = require('express');
 var app = express()
   , server = require('http').createServer(app)
-  , io = require('socket.io').listen(server)
-  , process = require('process');
+  , io = require('socket.io').listen(server);
 
 io.set('log level', 1);
 
@@ -37,8 +36,4 @@ io.sockets.on('connection', function (socket) {
   socket.on('deploy-parachute', function(){
     rocket.deployParachute();
   });
-});
-
-process.on('exit', function(code) {
-  rocket.shutdown();
 });

@@ -94,14 +94,8 @@ function Rocket(opts) {
 
   robot.start();
 
-  function shutdown() {
-    robot.statusLed1.turnOff();
-    robot.statusLed2.turnOff();
-  }
-
   this.armParachute = robot.armParachute;
   this.deployParachute = robot.deployParachute;
-  this.shutdown = shutdown;
 }
 
 util.inherits(Rocket, EventEmitter);

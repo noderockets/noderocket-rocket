@@ -11,7 +11,7 @@ function Rocket(opts) {
     mode: 1,
     servoInitAngle: 150,
     servoReleaseAngle: 65,
-    launchThreshold: 4
+    launchThreshold: 3
   }, opts);
 
   var thiz = this;

@@ -24,7 +24,8 @@
   });
 
   socket.on('rocket-data', function(data) {
-    if(myLineChart.datasets[0].points.length > 30) {
+    console.log(data);
+    if(myLineChart.datasets[0].points.length > 100) {
       myLineChart.removeData();
     }
     myLineChart.addData([data.pressure, data.altitude], moment().format("h:mm:ss"));

@@ -28,7 +28,7 @@
     if(myLineChart.datasets[0].points.length > 100) {
       myLineChart.removeData();
     }
-    myLineChart.addData([data.pressure, data.altitude], moment().format("h:mm:ss"));
+    myLineChart.addData([data.temperature, data.altitude], moment().format("h:mm:ss"));
   });
 
 

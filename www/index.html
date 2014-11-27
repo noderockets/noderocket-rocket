@@ -24,10 +24,10 @@
   });
 
   socket.on('rocket-data', function(data) {
-    console.log(data);
-    if(myLineChart.datasets[0].points.length > 100) {
-      myLineChart.removeData();
-    }
+//    console.log(data);
+//    if(myLineChart.datasets[0].points.length > 100) {
+//      myLineChart.removeData();
+//    }
     myLineChart.addData([data.temperature, data.altitude], moment().format("h:mm:ss"));
   });
 

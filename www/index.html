@@ -1,39 +1,40 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Node Rockets</title>
-    <link rel="stylesheet" href="css/rocket.css">
-  </head>
-  <body>
-    <div id="buttons">
-      <div class="button" id="reset"><div class="outer"><div class="height"><div class="inner">Reset</div></div></div></div>
-      <div class="button" id="activate"><div class="outer"><div class="height"><div class="inner">Activate</div></div></div></div>
-      <div class="button" id="parachute"><div class="outer"><div class="height"><div class="inner">Parachute</div></div></div></div>
-    </div>
-    <div id="container">
-      <div id="chart">
-        <div class="a-cont"><a class="pause">Pause</a></div>
-        <div class="a-cont"><a class="reset">Reset</a></div>
-      </div>
+<head>
+  <title>Node Rockets</title>
+  <!--<link rel="stylesheet" href="css/rocket.css">-->
+</head>
+<body>
 
-      <div id="log">
-        <div class="a-cont"><a>Clear</a></div>
-        <div class="title">Rocket Log:</div>
-        <b>Time</b><span>Message</span>
-        <hr>
-        <div id="msgs"></div>
-      </div>
+<button onclick="deploy()">Deploy</button>
+<button onclick="arm()">Arm</button>
 
-      <div id="preview">
-        <img src="#">
-      </div>
-    </div>
+<canvas id="myChart" width="800" height="300"></canvas>
 
-    <script type="text/javascript" src="/socket.io/socket.io.js"></script>
-    <script type="text/javascript" src="js/lib/d3.min.js"></script>
-    <script type="text/javascript" src="js/line-graph.js"></script>
-    <script type="text/javascript" src="js/rocket-info.js"></script>
-    <script type="text/javascript" src="js/ws.js"></script>
+<script type="text/javascript" src="/socket.io/socket.io.js"></script>
+<script type="text/javascript" src="js/lib/d3.min.js"></script>
+<script type="text/javascript" src="js/lib/moment.min.js"></script>
 
-  </body>
+<script>
+  var socket = io.connect();
+
+  socket.on('hello', function(d) {
+    console.log('Hello Rocket!');
+  });
+
+  socket.on('rocket-data', function(data) {
+    console.log(data);
+  });
+
+
+  function deploy() {
+    socket.emit('deploy-parachute');
+  }
+
+  function arm() {
+    socket.emit('arm-parachute');
+  }
+</script>
+
+</body>
 </html>

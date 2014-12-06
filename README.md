@@ -1,3 +1,6 @@
+This the JSConf 2014 version of the code
+
+
 noderocket-rocket
 =================
 

@@ -6,7 +6,7 @@ module.exports = function (rocket) {
   var lastAltitude = Number.MIN_VALUE;
   var descentCount = 0;
 
-  rocket.on('data', function() {
+  rocket.on('data', function(data) {
 
     if(!data.deployed) {
       var currentAltitude = data.altitude;

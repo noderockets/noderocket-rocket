@@ -264,9 +264,10 @@
       altitude: { min: Number.MAX_VALUE, max: Number.MIN_VALUE }
     };
     function updateHUD(values) {
-      var temperature = Math.round(values.temperature * 100) / 100;
-      var pressure = Math.round(values.pressure * 100) / 100;
-      var altitude = Math.round(values.altitude * 100) / 100;
+      var val = values[values.length - 1];
+      var temperature = Math.round(val.temperature * 100) / 100;
+      var pressure = Math.round(val.pressure * 100) / 100;
+      var altitude = Math.round(val.altitude * 100) / 100;
 
       minmax.temperature.max = Math.max(minmax.temperature.max, temperature);
       minmax.temperature.min = Math.min(minmax.temperature.min, temperature);
@@ -275,8 +276,8 @@
       minmax.altitude.max = Math.max(minmax.altitude.max, altitude);
       minmax.altitude.min = Math.min(minmax.altitude.min, altitude);
 
-      document.getElementById('launched').innerHTML = values.launched;
-      document.getElementById('deployed').innerHTML = values.deployed;
+      document.getElementById('launched').innerHTML = val.launched;
+      document.getElementById('deployed').innerHTML = val.deployed;
       document.getElementById('temperature').innerHTML = temperature;
       document.getElementById('temperature-min').innerHTML = minmax.temperature.min;
       document.getElementById('temperature-max').innerHTML = minmax.temperature.max;
@@ -286,8 +287,7 @@
       document.getElementById('altitude').innerHTML = altitude;
       document.getElementById('altitude-min').innerHTML = minmax.altitude.min;
       document.getElementById('altitude-max').innerHTML = minmax.altitude.max;
-      document.getElementById('time').innerHTML = values.time.format('LTS');
-
+      document.getElementById('time').innerHTML = val.time.format('LTS');
     }
 
 </script>

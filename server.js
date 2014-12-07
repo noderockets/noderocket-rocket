@@ -6,7 +6,7 @@ var app = express()
 
 io.set('log level', 1);
 
-//app.use(express.static(__dirname + '/www'));
+app.use(express.static(__dirname + '/www'));
 
 var Rocket = require('./pirocket');
 var rocket = new Rocket();

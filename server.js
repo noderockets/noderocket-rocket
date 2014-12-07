@@ -12,8 +12,8 @@ var Rocket = require('./pirocket');
 var rocket = new Rocket();
 
 require('./strategy/detect-launch')(rocket);
-//require('./strategy/parachute-timer')(rocket);
-require('./strategy/parachute-apogee')(rocket);
+require('./strategy/parachute-timer')(rocket);
+//require('./strategy/parachute-apogee')(rocket);
 
 rocket.on('data', function(data) {
   io.sockets.emit('rocket-data', data)

@@ -7,16 +7,19 @@ module.exports = function (rocket) {
   var descentCount = 0;
 
   rocket.on('data', function() {
-    var currentAltitude = data.altitude;
 
-    if(lastAltitude > currentAltitude) {
-      descentCount++;
+    if(!data.deployed) {
+      var currentAltitude = data.altitude;
 
-      if(descentCount > THRESHOLD) {
-        rocket.deployParachute();
+      if(lastAltitude > currentAltitude) {
+        descentCount++;
+
+        if(descentCount > THRESHOLD) {
+          rocket.deployParachute();
+        }
+      } else {
+        descentCount = 0;
       }
-    } else {
-      descentCount = 0;
     }
   });
 };

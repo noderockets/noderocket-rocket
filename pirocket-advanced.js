@@ -77,7 +77,7 @@ function Rocket(opts) {
       });
 
       // Listen for launch detection
-      thiz.on('launch', function() { data.launch = true });
+      thiz.on('launched', function() { data.launched = true });
     },
 
     armParachute: function() {

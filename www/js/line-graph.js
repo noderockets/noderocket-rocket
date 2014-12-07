@@ -7,7 +7,7 @@ function lineChart(el) {
   'use strict';
 
   var MAX_SECONDS = 10;
-  var MAX_ALTITUDE = 70;
+  var MAX_ALTITUDE = 100;
   var EVENT_COLOR = 'green';
 
   var m = { left: 30, right: 40, top: 30, bottom: 40 };

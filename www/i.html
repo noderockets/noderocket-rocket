@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Node Rockets</title>
+  <!--<link rel="stylesheet" href="css/rocket.css">-->
+
+  <style>
+    body {
+      font: 10px sans-serif;
+      margin: 0;
+      /*background: url(images/black_lozenge.png);*/
+      background: #333;
+    }
+
+    svg {
+      /*background: #6d941b;*/
+      background: url(images/tiny_grid.png);
+    }
+
+    .axis path,
+    .axis line {
+      fill: none;
+      stroke: #000;
+      shape-rendering: crispEdges;
+    }
+
+    .x.axis path {
+      display: none;
+    }
+
+    .line {
+      fill: none;
+      stroke: steelblue;
+      stroke-width: 1.5px;
+    }
+
+    #graph {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      height: 300px;
+    }
+  </style>
+</head>
+<body>
+
+<button onclick="deploy()">Deploy</button>
+<button onclick="arm()">Arm</button>
+
+<!--<iframe src="http://192.168.1.101:8080/javascript_simple.html"></iframe>-->
+
+<div id="graph"></div>
+
+<script type="text/javascript" src="/socket.io/socket.io.js"></script>
+<script type="text/javascript" src="js/lib/d3.min.js"></script>
+<script type="text/javascript" src="js/lib/moment.min.js"></script>
+<script type="text/javascript" src="js/line-graph.js"></script>
+
+<script>
+  /*
+  var socket = io.connect();
+
+  socket.on('hello', function (d) {
+    console.log('Hello Rocket!');
+  });
+
+
+  function deploy() {
+    socket.emit('deploy-parachute');
+  }
+
+  function arm() {
+    socket.emit('arm-parachute');
+  }
+*/
+
+
+  var chart = new lineChart(document.getElementById('graph'));
+  chart.init();
+
+  /*
+   socket.on('rocket-data', function (d) {
+   console.log(d);
+
+   data.push({
+   altitude: d.altitude,
+   time: new moment()
+   });
+
+   data = data.splice(-150);
+   updateData();
+   });
+   */
+
+//  setInterval(function () {
+//    data.push({
+//      altitude: Math.random() * 2000,
+//      time: new moment()
+//    });
+//
+//    data = data.splice(-150);
+//    updateData();
+//  }, 200);
+
+  var data = [];
+  var points = [];
+  var degrees = 0;
+  setInterval(function () {
+    data.push({
+      y: Math.sin(degrees / 180 * Math.PI) * 80,
+      x: (new Date()).getTime() / 1000
+    });
+    degrees += 1;
+
+    data = data.splice(-150);
+    chart.update(data, points);
+  }, 100);
+
+  setInterval(function() {
+    points.push({
+      x: (new Date()).getTime() / 1000,
+      y: Math.sin(degrees / 180 * Math.PI) * 80,
+      what: 'Hello'
+    });
+  }, 2000);
+</script>
+
+</body>
+</html>

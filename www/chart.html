@@ -45,13 +45,16 @@
 <button onclick="deploy()">Deploy</button>
 <button onclick="arm()">Arm</button>
 
+<!--<iframe src="http://192.168.1.101:8080/javascript_simple.html"></iframe>-->
+
 <div id="graph"></div>
 
-<script type="text/javascript" src="/socket.io/socket.io.js"></script>
+<!--<script type="text/javascript" src="/socket.io/socket.io.js"></script>-->
 <script type="text/javascript" src="js/lib/d3.min.js"></script>
 <script type="text/javascript" src="js/lib/moment.min.js"></script>
 
 <script>
+  /*
   var socket = io.connect();
 
   socket.on('hello', function (d) {
@@ -65,7 +68,7 @@
 
   function arm() {
     socket.emit('arm-parachute');
-  }
+  }*/
 
   var data = [];
 
@@ -171,29 +174,29 @@
 
   }
 
+  /*
+   socket.on('rocket-data', function (d) {
+   console.log(d);
 
-  socket.on('rocket-data', function (d) {
-    console.log(d);
+   data.push({
+   altitude: d.altitude,
+   time: new moment()
+   });
 
+   data = data.splice(-150);
+   updateData();
+   });
+   */
+
+  setInterval(function () {
     data.push({
-      altitude: d.altitude,
+      altitude: Math.random() * 2000,
       time: new moment()
     });
 
     data = data.splice(-150);
     updateData();
-  });
-
-
-  //  setInterval(function () {
-//    data.push({
-//      altitude: Math.random() * 2000,
-//      time: new moment()
-//    });
-//
-//    data = data.splice(-150);
-//    updateData();
-//  }, 200);
+  }, 200);
 
 </script>
 

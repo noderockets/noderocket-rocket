@@ -9,8 +9,8 @@ function Rocket(opts) {
   var config = _.extend({
     dataInterval: 100,
     mode: 1,
-    servoInitAngle: 150,
-    servoReleaseAngle: 65,
+    servoInitAngle: 170,
+    servoReleaseAngle: 5,
     launchThreshold: 3
   }, opts);
 

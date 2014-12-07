@@ -230,13 +230,14 @@
   socket.on('rocket-data', function (d) {
     console.log(d);
 
+    var date = new moment();
     data.push({
       altitude: d.altitude,
-      time: new moment()
+      time: date
     });
 
     data = data.splice(-150);
-    updateHUD(data);
+    updateHUD(d, date);
     updateData();
   });
 
@@ -263,8 +264,7 @@
       pressure: { min: Number.MAX_VALUE, max: Number.MIN_VALUE },
       altitude: { min: Number.MAX_VALUE, max: Number.MIN_VALUE }
     };
-    function updateHUD(values) {
-      var val = values[values.length - 1];
+    function updateHUD(val) {
       var temperature = Math.round(val.temperature * 100) / 100;
       var pressure = Math.round(val.pressure * 100) / 100;
       var altitude = Math.round(val.altitude * 100) / 100;

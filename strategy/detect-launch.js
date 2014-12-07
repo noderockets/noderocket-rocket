@@ -1,16 +1,17 @@
+var LAUNCH_THRESHOLD = 3;
+
 module.exports = function (rocket) {
-  var lauched = false;
-  var buffer = [];
+  var firstKnown;
 
   rocket.on('data', function(data) {
-    if(!data.launched) {
-      buffer.push(data.altitude);
+    var current = data.altitude;
 
-      if(buffer.length > 10) {
-        buffer = buffer.slice(-10);
-        if(buffer[9] - buffer[0] > 3) {
-          rocket.emit('launched');
-        }
+    if(!firstKnown) {
+      firstKnown = current;
+    } else {
+      if (current > (firstKnown + LAUNCH_THRESHOLD)) {
+        console.log('detected launch');
+        rocket.emit('launched');
       }
     }
   });

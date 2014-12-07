@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Node Rockets</title>
+  <!--<link rel="stylesheet" href="css/rocket.css">-->
+</head>
+<body>
+
+<button onclick="deploy()">Deploy</button>
+<button onclick="arm()">Arm</button>
+
+<canvas id="myChart" width="800" height="300"></canvas>
+
+<script type="text/javascript" src="/socket.io/socket.io.js"></script>
+<script type="text/javascript" src="js/lib/d3.min.js"></script>
+<script type="text/javascript" src="js/lib/moment.min.js"></script>
+
+<script>
+  var socket = io.connect();
+
+  socket.on('hello', function(d) {
+    console.log('Hello Rocket!');
+  });
+
+  socket.on('rocket-data', function(data) {
+    console.log(data);
+  });
+
+
+  function deploy() {
+    socket.emit('deploy-parachute');
+  }
+
+  function arm() {
+    socket.emit('arm-parachute');
+  }
+</script>
+
+</body>
+</html>

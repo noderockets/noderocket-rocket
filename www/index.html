@@ -3,13 +3,106 @@
 <head>
   <title>Node Rockets</title>
   <!--<link rel="stylesheet" href="css/rocket.css">-->
+  <link rel="stylesheet" href="css/bootstrap.min.css"/>
+  <style>
+    body {
+      font: 10px sans-serif;
+      margin: 0;
+      /*background: url(images/black_lozenge.png);*/
+      background: #333;
+    }
+
+    svg {
+      /*background: #6d941b;*/
+      background: url(images/tiny_grid.png);
+    }
+
+    .axis path,
+    .axis line {
+      fill: none;
+      stroke: #000;
+      shape-rendering: crispEdges;
+    }
+
+    .x.axis path {
+      display: none;
+    }
+
+    .line {
+      fill: none;
+      stroke: steelblue;
+      stroke-width: 3px;
+    }
+
+    #graph {
+      position: absolute;
+      bottom: 0;
+    }
+
+    .block {
+      margin: 11px;
+      background-color: rgba(102, 102, 102, .5);
+      border: 3px solid rgb(36, 70, 106);
+      border-radius: 8px;
+      -webkit-box-shadow: none;
+      box-shadow: none;
+    }
+
+    .stat, .stat-val, .summary-val {
+      float: left;
+      width: 200px;
+      font-size: 24px;
+      height: 50px;
+      line-height: 65px;
+      margin-right: 20px;
+    }
+
+    .stat {
+      text-align: right;
+      clear: both;
+    }
+
+    .summary-stat {
+
+    }
+
+    .separator {
+      width: 100%;
+      clear: both;
+      border-bottom: 3px solid rgb(36, 70, 106);
+      height: 13px;
+    }
+
+    .middler {
+      text-align: center;
+      padding: 33px;
+    }
+
+    .header {
+      color: white;
+      font-weight: bold;
+    }
+  </style>
 </head>
 <body>
 
-<button onclick="deploy()">Deploy</button>
-<button onclick="arm()">Arm</button>
+<div class="block" style="width: 900px; height: 500px;">
+  <div class="stat header">Launched</div><div class="stat-val" id="launched"></div>
+  <div class="stat header">Deployed</div><div class="stat-val" id="deployed"></div>
+  <div class="separator"></div>
+  <div class="stat header">Statistic</div><div class="stat-val header">Current</div><div class="summary-val header">Min</div><div class="summary-val header">Max</div>
+  <div class="stat header">Temperature</div><div class="stat-val" id="temperature"></div><div class="summary-val" id="temperature-min"></div><div class="summary-val" id="temperature-max"></div>
+  <div class="stat header">Pressure</div><div class="stat-val" id="pressure"></div><div class="summary-val" id="pressure-min"></div><div class="summary-val" id="pressure-max"></div>
+  <div class="stat header">Altitude</div><div class="stat-val" id="altitude"></div><div class="summary-val" id="altitude-min"></div><div class="summary-val" id="altitude-max"></div>
+  <div class="stat header">Time</div><div class="stat-val" id="time"></div>
+  <div class="separator"></div>
+  <div class="middler">
+    <button onclick="deploy()" class="btn btn-primary btn-lg">Deploy</button>
+    <button onclick="arm()" class="btn btn-primary btn-lg">Arm</button>
+  </div>
+</div>
 
-<canvas id="myChart" width="800" height="300"></canvas>
+<div id="graph"></div>
 
 <script type="text/javascript" src="/socket.io/socket.io.js"></script>
 <script type="text/javascript" src="js/lib/d3.min.js"></script>
@@ -18,14 +111,9 @@
 <script>
   var socket = io.connect();
 
-  socket.on('hello', function(d) {
+  socket.on('hello', function (d) {
     console.log('Hello Rocket!');
   });
-
-  socket.on('rocket-data', function(data) {
-    console.log(data);
-  });
-
 
   function deploy() {
     socket.emit('deploy-parachute');
@@ -34,6 +122,174 @@
   function arm() {
     socket.emit('arm-parachute');
   }
+
+  var data = [];
+
+  var margin = {top: 20, right: 20, bottom: 30, left: 50},
+      width = window.innerWidth - margin.left - margin.right,
+      height = 250 - margin.top - margin.bottom;
+
+  // Parse the datetime
+  //  var parseDate = d3.time.format("%H:%M:%S").parse;
+
+  var xScale = d3.time.scale()
+      .range([0, width]);
+
+  var yScale = d3.scale.linear()
+      .range([height, 0]);
+
+  var xAxis = d3.svg.axis()
+      .scale(xScale)
+      .orient("bottom");
+
+  var yAxis = d3.svg.axis()
+      .scale(yScale)
+      .orient("left");
+
+  var line = d3.svg.line()
+      .x(function (d) {
+        return xScale(d.time);
+      })
+      .y(function (d) {
+        return yScale(d.altitude);
+      });
+
+  var svg = d3.select("#graph").append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+  data.forEach(function (datum) {
+//    datum.time = parseDate(datum.time);
+    datum.time = moment(datum.time).toDate();
+    datum.altitude = +datum.altitude;
+  });
+
+  xScale.domain(d3.extent(data, function (d) {
+    return d.time
+  }));
+  yScale.domain(d3.extent(data, function (d) {
+    return d.altitude
+  }));
+
+  svg.append('g')
+      .attr('class', 'x axis')
+      .attr('transform', 'translate(0,' + height + ')')
+      .call(xAxis);
+
+
+  svg.append('g')
+      .attr('class', 'y axis')
+      .call(yAxis)
+      .append('text')
+      .attr('transform', 'rotate(-90)')
+      .attr('y', 6)
+      .attr('dy', ".71em")
+      .style('text-anchor', 'end')
+      .text('Altitude');
+
+
+  svg.append('path')
+      .datum(data)
+      .attr('class', 'line')
+      .attr('d', line);
+
+
+  function updateData() {
+
+    data.forEach(function (datum) {
+//    datum.time = parseDate(datum.time);
+      datum.time = moment(datum.time).toDate();
+      datum.altitude = +datum.altitude;
+    });
+
+    xScale.domain(d3.extent(data, function (d) {
+      return d.time
+    }));
+    yScale.domain(d3.extent(data, function (d) {
+      return d.altitude
+    }));
+
+    var svg = d3.select("body").transition();
+
+    // Make the changes
+    svg.select(".line")   // change the line
+        .duration(10)
+        .attr("d", line(data));
+    svg.select(".x.axis") // change the x axis
+        .duration(10)
+        .call(xAxis);
+    svg.select(".y.axis") // change the y axis
+        .duration(10)
+        .call(yAxis);
+
+  }
+
+  socket.on('rocket-data', function (d) {
+    console.log(d);
+
+    data.push({
+      altitude: d.altitude,
+      time: new moment()
+    });
+
+    data = data.splice(-150);
+    updateHUD(data);
+    updateData();
+  });
+
+
+//    setInterval(function () {
+//      var values = {
+//        launched: false,
+//        deployed: false,
+//        temperature: (Math.random() *.5) + 22.5,
+//        pressure: (Math.random() * 100) + 102000,
+//        altitude: Math.random() * 400,
+//        time: new moment()
+//      };
+//      data.push(values);
+//      updateHUD(values);
+//
+//      data = data.splice(-150);
+//      updateData();
+//    }, 200);
+
+
+    var minmax = {
+      temperature: { min: Number.MAX_VALUE, max: Number.MIN_VALUE },
+      pressure: { min: Number.MAX_VALUE, max: Number.MIN_VALUE },
+      altitude: { min: Number.MAX_VALUE, max: Number.MIN_VALUE }
+    };
+    function updateHUD(values) {
+      var temperature = Math.round(values.temperature * 100) / 100;
+      var pressure = Math.round(values.pressure * 100) / 100;
+      var altitude = Math.round(values.altitude * 100) / 100;
+
+      minmax.temperature.max = Math.max(minmax.temperature.max, temperature);
+      minmax.temperature.min = Math.min(minmax.temperature.min, temperature);
+      minmax.pressure.max = Math.max(minmax.pressure.max, pressure);
+      minmax.pressure.min = Math.min(minmax.pressure.min, pressure);
+      minmax.altitude.max = Math.max(minmax.altitude.max, altitude);
+      minmax.altitude.min = Math.min(minmax.altitude.min, altitude);
+
+      document.getElementById('launched').innerHTML = values.launched;
+      document.getElementById('deployed').innerHTML = values.deployed;
+      document.getElementById('temperature').innerHTML = temperature;
+      document.getElementById('temperature-min').innerHTML = minmax.temperature.min;
+      document.getElementById('temperature-max').innerHTML = minmax.temperature.max;
+      document.getElementById('pressure').innerHTML = pressure;
+      document.getElementById('pressure-min').innerHTML = minmax.pressure.min;
+      document.getElementById('pressure-max').innerHTML = minmax.pressure.max;
+      document.getElementById('altitude').innerHTML = altitude;
+      document.getElementById('altitude-min').innerHTML = minmax.altitude.min;
+      document.getElementById('altitude-max').innerHTML = minmax.altitude.max;
+      document.getElementById('time').innerHTML = values.time.format('LTS');
+
+    }
+
 </script>
 
 </body>

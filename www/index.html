@@ -264,7 +264,7 @@
       pressure: { min: Number.MAX_VALUE, max: Number.MIN_VALUE },
       altitude: { min: Number.MAX_VALUE, max: Number.MIN_VALUE }
     };
-    function updateHUD(val) {
+    function updateHUD(val, date) {
       var temperature = Math.round(val.temperature * 100) / 100;
       var pressure = Math.round(val.pressure * 100) / 100;
       var altitude = Math.round(val.altitude * 100) / 100;
@@ -287,7 +287,7 @@
       document.getElementById('altitude').innerHTML = altitude;
       document.getElementById('altitude-min').innerHTML = minmax.altitude.min;
       document.getElementById('altitude-max').innerHTML = minmax.altitude.max;
-      document.getElementById('time').innerHTML = val.time.format('LTS');
+      document.getElementById('time').innerHTML = date.format('LTS');
     }
 
 </script>

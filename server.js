@@ -6,17 +6,13 @@ var app = express()
 
 io.set('log level', 1);
 
-app.use(express.static(__dirname + '/www'));
-server.listen(80);
+//app.use(express.static(__dirname + '/www'));
 
 var Rocket = require('./pirocket');
 var rocket = new Rocket();
 
-require('./timer-strategy')(rocket);
-
-app.get('/', function (req, res) {
-  res.sendfile(__dirname + '/www/index.html');
-});
+require('./strategy/detect-launch')(rocket);
+require('./strategy/parachute-timer')(rocket);
 
 rocket.on('data', function(data) {
   io.sockets.emit('rocket-data', data)
@@ -37,3 +33,14 @@ io.sockets.on('connection', function (socket) {
     rocket.deployParachute();
   });
 });
+
+
+// Routes
+app.get('/', function (req, res) {
+  res.sendfile(__dirname + '/www/index.html');
+});
+
+
+// Listen
+server.listen(80);
+console.log('Rocket listening on port 80');

@@ -6,6 +6,6 @@ module.exports = function (rocket) {
     setTimeout(function(){
       console.log('Deploy parachute now!');
       rocket.deployParachute();
-    }, 3000);
+    }, 2500);
   });
 };

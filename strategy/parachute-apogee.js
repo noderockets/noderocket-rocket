@@ -6,6 +6,7 @@ module.exports = function (rocket) {
   var lastAltitude = Number.MIN_VALUE;
   var descentCount = 0;
 
+  // FIXME - this strategy does weird things to the servo
   rocket.on('data', function(data) {
 
     if(!data.deployed) {

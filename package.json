@@ -2,13 +2,7 @@
   "name": "noderocket",
   "version": "1.0.0",
   "dependencies": {
-    "socket.io": "~0.9.16",
-    "express": "~3.4.8",
-    "cylon-i2c": "~0.10.1",
-    "cylon-raspi": "~0.6.2",
-    "cylon": "~0.11.0",
-    "cylon-gpio": "~0.11.0",
-    "underscore": "~1.6.0",
-    "moving-average": "0.0.4"
+    "i2c": "*",
+    "underscore": "*"
   }
 }

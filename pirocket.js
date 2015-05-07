@@ -22,11 +22,20 @@ function Rocket(opts) {
   };
 
   var robot = Cylon.robot({
-    connection: {name: 'raspi', adaptor: 'raspi'},
-    devices: [
-      { name: 'bmp180',   driver: 'bmp180' },
-      { name: 'servo',    driver: 'servo',  pin: 12 }
-    ],
+    connections: {
+      raspi: {
+        adaptor: 'raspi'
+      }
+    },
+    devices: {
+      bmp180: {
+        driver: 'bmp180'
+      },
+      servo: {
+        driver: 'servo',
+        pin: 12
+      }
+    },
 
     work: function(my) {
       // Read sensor data

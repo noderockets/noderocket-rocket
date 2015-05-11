@@ -217,6 +217,7 @@ BMP085.prototype.convertTemperature = function(raw) {
 BMP085.prototype.readPressure = function(callback) {
   var self = this;
 
+  var time = process.hrtime();
   self.wire.writeBytes(self.registers.control.location, new Buffer([self.commands.readPressure + (self.options.mode << 6)]), function(err) {
     if (err) {
       throw (err);
@@ -231,6 +232,7 @@ BMP085.prototype.readPressure = function(callback) {
             lsb = bytes.readUInt8(1),
             xlsb = bytes.readUInt8(2),
             value = ((msb << 16) + (lsb << 8) + xlsb) >> (8 - self.options.mode);
+        console.log(process.hrtime(time) + ' ' + value);
         callback(value);
       });
     }, timeToWait);

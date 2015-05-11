@@ -1,107 +1,163 @@
+var EventEmitter = require('events').EventEmitter;
 var Mpu6050 = require('./driver/mpu6050');
 var Bmp180 = require('./driver/bmp180');
-var EventEmitter = require('events').EventEmitter;
+var util = require('util');
+var _ = require('underscore');
 
-// Instantiate and initialize.
-const TEST_DURATION_IN_MS = 1000;
+/**
+ * NodeRocket
+ * @param opts
+ * @constructor
+ */
+var Rocket = function(opts) {
+  const TEST_DURATION_IN_MS = 1000;
+  var rocket = this;
 
-var motion = new Mpu6050();
-var altimeter = new Bmp180({ mode: 1 });
-var events = new EventEmitter();
+  var config = _.extend({
+    log: {
+      data: console,
+      event: console
+    },
+    data: {
+      interval: 50
+    },
+    altimeter: {
+      enabled: true,
+      mode: 1,
+      buffer: 10
+    },
+    motion: {
+      enabled: true,
+      accelerometer: { mode: 3 },
+      gyroscope: { mode: 0 },
+      debug: false
+    },
+    servo: {
+      initAngle:    170,
+      releaseAngle: 5
+    },
+    launchThreshold: 3
+  }, opts);
 
-// --- Prepare altimeter -------------------------------------------------------
-altimeter.events.on('calibrated', function() {
-  events.emit('altimeter.ready');
-});
-altimeter.read(function() {
-  console.log('ROCKET: altitude device detected');
-});
 
-// --- Prepare motion sensor ---------------------------------------------------
-motion.initialize(function() {
-  console.log('ROCKET: motion device initialized');
-  motion.testAllDeviceFunctionality(function(err, something) {
-    console.log('ROCKET: motion device tested... \n', something);
-    motion.calibrate(function() {
-      console.log('ROCKET: motion device calibrated.');
-      events.emit('motion.ready');
+  var altimeter = new Bmp180(config.altimeter);
+  var motion = new Mpu6050(config.motion);
+  EventEmitter.call(this);
+
+  var dlog = config.log.data;
+  var elog = config.log.event;
+
+  // --- PREPARE ALTIMETER -----------------------------------------------------
+  altimeter.events.on('calibrated', function() {
+    rocket.emit('altimeter.ready');
+  });
+  altimeter.read(function() {
+    elog.debug('ROCKET: altitude device detected');
+  });
+
+
+  // --- PREPARE MOTION SENSOR -------------------------------------------------
+  motion.initialize(function() {
+    elog.debug('ROCKET: motion device initialized');
+    motion.testAllDeviceFunctionality(function(err, something) {
+      elog.debug('ROCKET: motion device tested... \n', something);
+      motion.calibrate(function() {
+        elog.debug('ROCKET: motion device calibrated.');
+        rocket.emit('motion.ready');
+      });
     });
   });
-});
 
-events.once('altimeter.ready', function() {
-  console.log('altimeter.ready');
-  setReady('altimeter');
-});
 
-events.once('motion.ready', function() {
-  console.log('motion.ready');
-  setReady('motion');
-});
+  // --- EVENT LISTENERS -------------------------------------------------------
 
-events.on('motion.error', function() {
-  console.log('motion.error');
-});
+  rocket.once('altimeter.ready', function() {
+    elog.info('altimeter.ready');
+    setReady('altimeter');
+  });
 
-events.on('rocket.ready', function() {
-  console.log('rocket.ready');
-});
+  rocket.once('motion.ready', function() {
+    elog.info('motion.ready');
+    setReady('motion');
+  });
 
-events.on('rocket.data', function(data) {
-  console.log(data);
-});
+  rocket.on('motion.error', function() {
+    elog.error('motion.error');
+  });
 
-var rocket = {
-  motion: false,
-  altimeter: false
+  rocket.on('rocket.ready', function() {
+    elog.warning('rocket.ready');
+  });
+
+  rocket.on('rocket.data', function(data) {
+    dlog.info(data);
+  });
+
+
+  // --- ROCKET STATE ----------------------------------------------------------
+  var state = {
+    motion:    false,
+    altimeter: false
+  };
+
+
+  // --- Private Utility Functions ---------------------------------------------
+  function setReady(system) {
+    state[system] = true;
+    for (var sys in state) {
+      if (!state[sys]) return;
+    }
+    rocket.emit('rocket.ready');
+    state.motion = false;
+    state.altimeter = false;
+    readData();
+  }
+
+  function setData(system, data) {
+    state[system] = data;
+    for (var sys in state) {
+      if (!state[sys]) return;
+    }
+    state.dt = +new Date;
+    rocket.emit('rocket.data', state);
+    state.motion = false;
+    state.altimeter = false;
+  }
+
+  function readData() {
+    setInterval(function() {
+
+      altimeter.read(function(data) {
+        setData('altimeter', data);
+      });
+
+      motion.getMotion6(function(err, data) {
+        setData('motion', adaptData(data));
+      });
+
+    }, config.data.interval);
+  }
+
+  function adaptData(data) {
+    return {
+      ax: data[0],
+      ay: data[1],
+      az: data[2],
+      temp: data[3],
+      gx: data[4],
+      gy: data[5],
+      gz: data[6]
+    }
+  }
 };
 
-function setReady(system) {
-  rocket[system] = true;
-  for (var sys in rocket) {
-    if (!rocket[sys]) return;
-  }
-  events.emit('rocket.ready');
-  rocket.motion = false;
-  rocket.altimeter = false;
-  readData();
-}
+Rocket.prototype.armParachute = function() {
+  console.log("ARM PARACHUTE");
+};
 
-function setData(system, data) {
-  rocket[system] = data;
-  for (var sys in rocket) {
-    if (!rocket[sys]) return;
-  }
-  rocket.dt = +new Date;
-  events.emit('rocket.data', rocket);
-  rocket.motion = false;
-  rocket.altimeter = false;
-}
+Rocket.prototype.deployParachute = function() {
+  console.log("DEPLOY PARACHUTE");
+};
 
-function readData() {
-  setInterval(function() {
-
-    altimeter.read(function(data) {
-      setData('altimeter', data);
-    });
-
-    motion.getMotion6(function(err, data) {
-      setData('motion', adaptData(data));
-    });
-
-  }, 40);
-}
-
-function adaptData(data) {
-  return {
-    ax: data[0],
-    ay: data[1],
-    az: data[2],
-    temp: data[3],
-    gx: data[4],
-    gy: data[5],
-    gz: data[6]
-  }
-}
-
-//setTimeout(function() { }, 10000);
+util.inherits(Rocket, EventEmitter);
+module.exports = Rocket;

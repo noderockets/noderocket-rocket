@@ -30,7 +30,14 @@
 var Bmp085 = require('./lib/bmp085');
 
 function Bmp180(opts) {
+  this.options = opts;
   Bmp085.call(this, opts);
+
+  var bufferLength = this.options.buffer * 2;
+  this.tempRaw = new Int16Array(new ArrayBuffer(bufferLength));
+  this.presRaw = new Int16Array(new ArrayBuffer(bufferLength));
+
+  this.cnt = 0;
 }
 
 Bmp180.prototype = Object.create(Bmp085.prototype);
@@ -51,16 +58,34 @@ Bmp180.prototype.readAltitude = function(callback) {
 
 Bmp180.prototype.readData = function(callback) {
   var self = this;
+  var bufferLength = self.options.buffer;
 
   var rawTemperature;
+  var fixedTemperature;
   var rawPressure;
+  var fixedPressure;
+
   function rawDataCb() {
     if (!rawTemperature || !rawPressure) return;
+    var index = self.cnt % bufferLength;
+
+    self.tempRaw[index] = rawTemperature;
+    self.presRaw[index] = rawPressure;
+
+    self.cnt++;
+
+    if (self.cnt < 100) return;
+    //else {
+    //  fixedTemperature = self.getNormalizedValue(self.tempRaw, 3, rawTemperature);
+    //  fixedPressure = self.getNormalizedValue(self.presRaw, 3, rawPressure);
+    //  self.cnt++;
+    //}
+
     callback({
       tmp: self.convertTemperature(rawTemperature),
       bp: self.convertPressure(rawPressure),
       alt: self.calcAltitude(rawPressure)
-    })
+    });
   }
 
   this.readTemperature(function(data) {
@@ -71,6 +96,24 @@ Bmp180.prototype.readData = function(callback) {
     rawPressure = data;
     rawDataCb();
   });
+};
+
+Bmp180.prototype.getNormalizedValue = function(array, std, val) {
+  var sum = 0;
+  for (var i = 0; i < array.length; i++) {
+    sum += array[i];
+  }
+
+  var variance = 0;
+  var mean = sum / array.length;
+  for (var i = 0; i < array.length; i++) {
+    variance = variance + (array[i] - mean) * (array[i] - mean);
+  }
+
+  var deviation = Math.sqrt(variance);
+  //console.log('m: ' + mean + ' v: ' + variance + ' d: ' + deviation + ' s: ' + sum + ' me: ' + Math.abs(val - mean));
+  if (Math.abs(val - mean) > (deviation * std)) return mean;
+  else return val;
 };
 
 module.exports = Bmp180;

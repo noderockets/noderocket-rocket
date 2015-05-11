@@ -10,6 +10,7 @@
     "cylon-gpio": "~0.23.0",
     "moving-average": "0.0.4",
     "i2c": "*",
-    "underscore": "*"
+    "underscore": "*",
+    "log": "~1.4.0"
   }
 }

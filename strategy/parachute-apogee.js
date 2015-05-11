@@ -7,7 +7,7 @@ module.exports = function (rocket) {
   var descentCount = 0;
 
   // FIXME - this strategy does weird things to the servo
-  rocket.on('data', function(data) {
+  rocket.on('rocket.data', function(data) {
 
     if(!data.deployed) {
       var currentAltitude = data.altitude;

@@ -4,6 +4,32 @@ var Bmp180 = require('./driver/bmp180');
 var util = require('util');
 var _ = require('underscore');
 
+var defaults = {
+  log: {
+    data: console,
+    event: console
+  },
+  data: {
+    interval: 50
+  },
+  altimeter: {
+    enabled: true,
+    mode: 1,
+    buffer: 10
+  },
+  motion: {
+    enabled: true,
+    accelerometer: { mode: 3 },
+    gyroscope: { mode: 0 },
+    debug: true
+  },
+  servo: {
+    initAngle:    170,
+    releaseAngle: 5
+  },
+  launchThreshold: 3
+};
+
 /**
  * NodeRocket
  * @param opts
@@ -13,31 +39,7 @@ var Rocket = function(opts) {
   const TEST_DURATION_IN_MS = 1000;
   var rocket = this;
 
-  var config = _.extend({
-    log: {
-      data: console,
-      event: console
-    },
-    data: {
-      interval: 50
-    },
-    altimeter: {
-      enabled: true,
-      mode: 1,
-      buffer: 10
-    },
-    motion: {
-      enabled: true,
-      accelerometer: { mode: 3 },
-      gyroscope: { mode: 0 },
-      debug: false
-    },
-    servo: {
-      initAngle:    170,
-      releaseAngle: 5
-    },
-    launchThreshold: 3
-  }, opts);
+  var config = _.extend({}, defaults, opts);
 
 
   var altimeter = new Bmp180(config.altimeter);
@@ -48,13 +50,11 @@ var Rocket = function(opts) {
   var elog = config.log.event;
 
   // --- PREPARE ALTIMETER -----------------------------------------------------
-  altimeter.events.on('calibrated', function() {
+  altimeter.initialize(function(err) {
+    console.log('Rocket: Altimeter Initialized');
+    if (err) rocket.emit('altimeter.error', err);
     rocket.emit('altimeter.ready');
   });
-  altimeter.read(function() {
-    elog.debug('ROCKET: altitude device detected');
-  });
-
 
   // --- PREPARE MOTION SENSOR -------------------------------------------------
   motion.initialize(function() {
@@ -76,13 +76,19 @@ var Rocket = function(opts) {
     setReady('altimeter');
   });
 
+  rocket.on('altimeter.error', function(err) {
+    elog.error('altimeter.error');
+    elog.error(err);
+  });
+
   rocket.once('motion.ready', function() {
     elog.info('motion.ready');
     setReady('motion');
   });
 
-  rocket.on('motion.error', function() {
+  rocket.on('motion.error', function(err) {
     elog.error('motion.error');
+    elog.error(err);
   });
 
   rocket.on('rocket.ready', function() {
@@ -114,6 +120,8 @@ var Rocket = function(opts) {
   }
 
   function setData(system, data) {
+    console.log('ROCKET: setData(' + system + ', ' + data + ')');
+
     state[system] = data;
     for (var sys in state) {
       if (!state[sys]) return;

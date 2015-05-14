@@ -146,7 +146,7 @@ BMP180.prototype.readTemperature = function(callback) {
     if (err) throw err;
 
     setTimeout(function() {
-      readRegister(device.i2c, dat.temperature, function(err, value) {
+      readRegister(i2c, dat.temperature, function(err, value) {
         callback(value);
       });
       console.log('Read temp delay: ' + process.hrtime(time) + ' (should be 4.5ms)');

@@ -21,7 +21,7 @@ var defaults = {
     enabled: true,
     accelerometer: { mode: 3 },
     gyroscope: { mode: 0 },
-    debug: true
+    debug: false
   },
   servo: {
     initAngle:    170,
@@ -51,7 +51,6 @@ var Rocket = function(opts) {
 
   // --- PREPARE ALTIMETER -----------------------------------------------------
   altimeter.initialize(function(err) {
-    console.log('Rocket: Altimeter Initialized');
     if (err) rocket.emit('altimeter.error', err);
     rocket.emit('altimeter.ready');
   });
@@ -135,7 +134,7 @@ var Rocket = function(opts) {
   function readData() {
     setInterval(function() {
 
-      altimeter.read(function(data) {
+      altimeter.readData(function(data) {
         setData('altimeter', data);
       });
 

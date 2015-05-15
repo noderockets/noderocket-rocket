@@ -5,16 +5,21 @@ function Rocket(config) {
   EventEmitter.call(this);
   var rocket = this;
 
-  setTimeout(function() {
+  setTimeout(function () {
     rocket.emit('rocket.ready');
     startFakeData();
   }, 3000);
 
   function startFakeData() {
-    setInterval(function() {
+    setInterval(function () {
       rocket.emit('rocket.data', {
-        a: 1,
-        b: 2
+        ax: Math.random(),
+        ay: Math.random(),
+        az: Math.random(),
+        temp: Math.random(),
+        gx: Math.random(),
+        gy: Math.random(),
+        gz: Math.random()
       })
     }, 50);
   }

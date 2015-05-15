@@ -59,6 +59,19 @@ app.get('/', function (req, res) {
   res.sendfile(__dirname + '/www/index.html');
 });
 
+app.get('/modules/enable', function(req, res) {
+  moduleLoader.enable(req.query.module);
+  res.send('ok')
+});
+
+app.get('/modules/disable', function(req, res) {
+  moduleLoader.disable(req.query.module);
+  res.send('ok');
+});
+
+app.get('/modules', function(req, res) {
+  res.json(moduleLoader.getModules());
+});
 
 // --- ROCKET SERVER -----------------------------------------------------------
 server.listen(process.env.PORT || 80);

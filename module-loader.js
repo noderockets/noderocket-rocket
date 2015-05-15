@@ -27,8 +27,8 @@ ModuleLoader.prototype.getModules = function() {
 };
 
 ModuleLoader.prototype.addModule = function(module) {
-  this.modules[module.name] = module;
-  module(this.rocket, this.io);
+  var m = module(this.rocket, this.io);
+  this.modules[m.name] = m;
 };
 
 ModuleLoader.prototype.removeModule = function(module) {

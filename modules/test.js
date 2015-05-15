@@ -7,7 +7,7 @@ module.exports = function(rocket, io) {
   });
 
   rocket.on('rocket.data', function(data) {
-    console.log('Got rocket data: ', data);
+    //console.log('Got rocket data: ', data);
 
     io.sockets.emit('my-custom-event', "test");
   });

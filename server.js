@@ -59,6 +59,7 @@ app.get('/', function (req, res) {
   res.sendfile(__dirname + '/www/index.html');
 });
 
+// --- ROCKET MODULE ROUTES ----------------------------------------------------
 app.get('/modules/enable', function(req, res) {
   moduleLoader.enable(req.query.module);
   res.send('ok')

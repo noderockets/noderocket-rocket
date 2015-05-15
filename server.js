@@ -3,8 +3,14 @@ var Log = require('log');
 var express = require('express');
 var HTTP = require('http');
 var socketIO = require('socket.io');
-var Rocket = require('./pirocket-boreas');
 var fs = require('fs');
+var ModuleLoader = require('./module-loader');
+
+if (process.env.ROCKET_MODE === 'mock') {
+  var Rocket = require('./pirocket-mock');
+} else {
+  Rocket = require('./pirocket-boreas');
+}
 
 var datalog = new Log('debug', fs.createWriteStream('rocket-data.log'));
 var eventlog = new Log('debug', fs.createWriteStream('rocket-event.log'));
@@ -19,12 +25,9 @@ var rocket = new Rocket({ log: { data: datalog, event: eventlog } });
 io.set('log level', 1);
 app.use(express.static(__dirname + '/www'));
 
-
-// --- LOAD STRATEGIES ---------------------------------------------------------
-require('./strategy/detect-launch')(rocket);
-require('./strategy/parachute-timer')(rocket);
-//require('./strategy/parachute-apogee')(rocket);
-
+// --- LOAD ROCKET MODULES ------------------------------------------------------------
+var moduleLoader = new ModuleLoader(rocket, io);
+moduleLoader.loadFromDir();
 
 // --- SOCKET COMMUNICATION ----------------------------------------------------
 rocket.on('rocket.ready', function() {
@@ -58,8 +61,8 @@ app.get('/', function (req, res) {
 
 
 // --- ROCKET SERVER -----------------------------------------------------------
-server.listen(80);
-consolelog.info('Rocket Command Center on port 80');
+server.listen(process.env.PORT || 80);
+consolelog.info('Rocket Command Center on port ' + process.PORT);
 consolelog.info('Rocket Data Log written to rocket-data.log');
 consolelog.info('Rocket Event Log written to rocket-event.log');
 consolelog.info('Rocket Server Log written to rocket-server.log');

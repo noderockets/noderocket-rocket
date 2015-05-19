@@ -16,10 +16,13 @@ function Rocket(config) {
         ax: Math.random(),
         ay: Math.random(),
         az: Math.random(),
-        temp: Math.random(),
         gx: Math.random(),
         gy: Math.random(),
-        gz: Math.random()
+        gz: Math.random(),
+        atmp:Math.random(),
+        mtmp: Math.random(),
+        bp: Math.random(),
+        alt: Math.random()
       })
     }, 50);
   }

@@ -2,7 +2,7 @@ var Firebase = require("firebase");
 
 module.exports = function(rocket, io) {
   var myFirebaseRef = new Firebase("https://noderockets.firebaseio.com/testmodule");
-  var data = { ready: false};
+  var data = { ready: false };
   var writeInterval;
 
   console.log('initializing firebase module');

@@ -1,44 +1,43 @@
+var util = require('util');
+var RocketModule = require('../rocket-module');
 var Firebase = require("firebase");
 
-module.exports = function(rocket, io) {
-  var myFirebaseRef = new Firebase("https://noderockets.firebaseio.com/testmodule");
-  var data = { ready: false };
-  var writeInterval;
+function FirebaseModule(rocket, io) {
+  RocketModule.call(this, "firebase", rocket, io);
+  this.firebaseDb = new Firebase("https://noderockets.firebaseio.com/mynoderocket");
+  this.data = {};
 
-  console.log('initializing firebase module');
+  this.onRocketReady = function() {
+    this.data.ready = true;
+  }.bind(this);
 
-  rocket.on('rocket.ready', function() {
-    data.ready = true;
-  });
+  this.onRocketData = function(data) {
+    this.data.sensorData = data;
+  }.bind(this);
 
-  rocket.on('rocket.data', function(sensorData) {
-    data.sensorData = sensorData;
-  });
+  this.enable();
+}
 
-  function writeData() {
-    writeInterval = setInterval(function() {
-      myFirebaseRef.set(data);
-    }, 500);
-  }
+util.inherits(FirebaseModule, RocketModule);
 
-  function enable() {
-    console.log('Enabling firebase module');
-    writeData();
-  }
+FirebaseModule.prototype.doEnable = function() {
+  if(!this.enabled) {
+    this.rocket.on('rocket.ready', this.onRocketReady);
+    this.rocket.on('rocket.data', this.onRocketData);
 
-  function disable() {
-    console.log('Disable firebase module');
-    clearInterval(writeInterval);
-  }
-
-  return {
-    /* Unique name of module */
-    name: "firebase-module",
-
-    /*  Enable this module */
-    enable: enable,
-
-    /* Disable this module */
-    disable: disable
+    this.writeInterval = setInterval(function() {
+      this.firebaseDb.set(this.data)
+    }.bind(this), 500);
   }
 };
+
+FirebaseModule.prototype.doDisable = function() {
+  if(this.enabled) {
+    this.rocket.removeListener('rocket.ready', this.onRocketReady);
+    this.rocket.removeListener('rocket.data', this.onRocketData);
+
+    clearInterval(this.writeInterval);
+  }
+};
+
+module.exports = FirebaseModule;

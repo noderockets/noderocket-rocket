@@ -7,7 +7,7 @@ var fs = require('fs');
 var ModuleLoader = require('./module-loader');
 
 if (process.env.ROCKET_MODE === 'mock') {
-  var Rocket = require('./pirocket-mock');
+  var Rocket = require('./mocket');
 } else {
   Rocket = require('./pirocket-boreas');
 }

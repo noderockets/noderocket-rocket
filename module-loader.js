@@ -16,18 +16,24 @@ function ModuleLoader(rocket, io, opts) {
 ModuleLoader.prototype.loadFromDir = function () {
   fs.readdirSync(__dirname + '/' + this.config.moduleDir).forEach(function (file) {
     if (path.extname(file).toLowerCase() === '.js') {
-      var module = require(__dirname + '/' + this.config.moduleDir + '/' + file);
-      this.addModule(module);
+      var Module = require(__dirname + '/' + this.config.moduleDir + '/' + file);
+      this.addModule(Module);
     }
   }.bind(this));
 };
 
 ModuleLoader.prototype.getModules = function() {
-  return this.modules;
+  return _.map(this.modules, function(module) {
+      return {
+        name: module.name,
+        enabled: module.isEnabled()
+      }
+    }
+  );
 };
 
-ModuleLoader.prototype.addModule = function(module) {
-  var m = module(this.rocket, this.io);
+ModuleLoader.prototype.addModule = function(Module) {
+  var m = new Module(this.rocket, this.io);
   this.modules[m.name] = m;
 };
 

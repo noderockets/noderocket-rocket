@@ -44,6 +44,7 @@ function MPU6050(options) {
     address: MPU6050.DEFAULT_ADDRESS,
     accelerometer: { mode: 3 },
     gyroscope: { mode: 0 },
+    warmups: 10,
     debug: true
   };
 
@@ -3382,7 +3383,7 @@ MPU6050.prototype.calibrate = function(callback) {
   var down = this.accelerometer.denominator;
 
   this.log('MPU6050:   calibration warmup');
-  this.warmup(10, function() {
+  this.warmup(device.warmups, function() {
     device.log('MPU6050:   calibration warmup complete.');
     var target = {
       ax:   { zero: 0,    move: 1000, tolerance: 20 },

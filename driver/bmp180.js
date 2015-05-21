@@ -53,13 +53,11 @@ const READ_PRESSURE_DELAY_MS = [5, 8, 14, 26];
  * @constructor
  */
 function BMP180(opts) {
-  console.log('BMP180: Constructor');
-
   this.options = _.extend({}, defaults, opts);
   this.data = { calibration: {} };
 
   var cmd = registers.command;
-  cmd.readPressure = cmd.readPresBase + (this.mode << 6);
+  cmd.readPressure = [cmd.readPresBase.location + (this.options.mode << 6)];
 
   EventEmitter.call(this);
 }
@@ -73,24 +71,18 @@ util.inherits(BMP180, EventEmitter);
  * Readies the i2c driver, tests the i2c connection, and calibrates the device
  */
 BMP180.prototype.initialize = function(callback) {
-  console.log('BMP180: Initialize');
-
   this.i2cdev = new I2cDev(this.options.address, {
     device: this.options.device,
     debug: this.options.debug
   });
 
   this.calibrate(callback);
-
-  this.lastTime = process.hrtime();
 };
 
 /**
  * Recursively check calibration registers for values until all are set
  */
 BMP180.prototype.calibrate = function(callback) {
-  console.log('BMP180: Calibrate');
-
   var device = this;
   var i2c = device.i2cdev;
 
@@ -99,7 +91,6 @@ BMP180.prototype.calibrate = function(callback) {
     toCalibrate++;
 
     readRegister(i2c, reg, function(err, value) {
-      console.log('BMP180: waitForCalibration ' + name + ': ' + value);
       if (value === 'undefined') {
         setTimeout(device.calibrate(), 5);
       }
@@ -117,16 +108,15 @@ BMP180.prototype.calibrate = function(callback) {
  * @param callback
  */
 BMP180.prototype.readData = function(callback) {
-  console.log('BMP180: readData');
   var device = this;
+  var time = process.hrtime();
 
   device.readTemperature(function(rawTemperature) {
     device.readPressure(function(rawPressure) {
-      callback({
-        tmp: device.calcTemperature(rawTemperature),
-        bp: device.calcPressure(rawPressure),
-        alt: device.calcAltitude(rawPressure)
-      });
+      var tmp = device.calcTemperature(rawTemperature);
+      var bp = device.calcPressure(rawPressure);
+      var alt = device.calcAltitude(bp);
+      callback(null, { tmp: tmp, bp: bp, alt: alt });
     });
   });
 };
@@ -139,38 +129,47 @@ BMP180.prototype.readTemperature = function(callback) {
   var i2c = this.i2cdev;
   var cmd = registers.command;
   var dat = registers.data;
-  var time = process.hrtime();
 
-  var tmpcmd = new Buffer([cmd.readTemp]);
-  i2c.writeBytes(dat.control.location, tmpcmd, function(err) {
+  i2c.writeBytes(dat.control.location, [cmd.readTemp.location], function(err) {
     if (err) throw err;
 
     setTimeout(function() {
       readRegister(i2c, dat.temperature, function(err, value) {
         callback(value);
       });
-      console.log('Read temp delay: ' + process.hrtime(time) + ' (should be 4.5ms)');
     }, READ_TEMPERATURE_DELAY_MS)
   });
 };
 
 /**
- *
+ * Pre-calculate these values.
+ * Although these calculations are very fast, they are pre-calculated because
+ * this driver may be running every 10ms.  So it is important to make it as
+ * performant as possible
+ * @type {number}
+ */
+const PRE_CALCULATED_2TO15POW = Math.pow(2, 15);
+const PRE_CALCULATED_2TO11POW = Math.pow(2, 11);
+const PRE_CALCULATED_2TO04POW = Math.pow(2, 4);
+/**
+ * Calculate the temperature in Centegrade.  The datasheet provides this
+ * calculation, but expects the result to be an integer that represents 0.1
+ * degree.  It is divided by 10 so that we have an actual temperature.
  * @param raw
  * @returns {number}
  */
 BMP180.prototype.calcTemperature = function(raw) {
   var cData = this.data.calibration;
 
-  var x1 = ((raw - cData.ac6) * cData.ac5) >> 15;
-  var x2 = (cData.mc << 11) / (x1 + cData.md);
+  var x1 = ((raw - cData.ac6) * cData.ac5) / PRE_CALCULATED_2TO15POW;
+  var x2 = (cData.mc * PRE_CALCULATED_2TO11POW) / (x1 + cData.md);
   cData.b5 = x1 + x2;
 
-  return ((cData.b5 + 8) >> 4) / 10.0;
+  return (cData.b5 + 8) / PRE_CALCULATED_2TO04POW / 10;
 };
 
 /**
- *
+ * Read uncompensated pressure value
  * @param callback
  */
 BMP180.prototype.readPressure = function(callback) {
@@ -179,28 +178,16 @@ BMP180.prototype.readPressure = function(callback) {
   var dat = registers.data;
 
   var device = this;
-  var time = process.hrtime();
 
-  var tmpcmd = new Buffer([cmd.readPressure]);
-  i2c.writeBytes(dat.control.location, tmpcmd, function(err) {
+  i2c.writeBytes(dat.control.location, cmd.readPressure, function(err) {
     if (err) throw err;
 
     setTimeout(function() {
-      i2c.readBytes(dat.pressure.location, 3, function(err, bytes) {
-
-        var msb = bytes.readUInt8(0);
-        var lsb = bytes.readUInt8(1);
-        var xlsb = bytes.readUInt8(2);
-        var value = ((msb << 16) + (lsb << 8) + xlsb) >> (8 - device.mode);
-
-        console.log('Read pressure delay: ' + process.hrtime(time) + ' (should be 7.5ms)');
-        console.log('Since last time: ' + process.hrtime(time));
-        console.log(value);
-        device.lastTime = process.hrtime();
-
+      i2c.readBytes(dat.pressure.location, 3, function(err, data) {
+        var value = ((data[0] << 16) + (data[1] << 8) + data[2]) >> (8 - device.options.mode);
         callback(value);
       });
-    }, READ_PRESSURE_DELAY_MS[this.mode]);
+    }, READ_PRESSURE_DELAY_MS[device.options.mode]);
   });
 };
 
@@ -236,7 +223,7 @@ BMP180.prototype.calcPressure = function(raw) {
   x2 = (-7375 * p) >> 16;
 
   p = p + ((x1 + x2 + 3791) >> 4);
-  p = p / 100; // hPa
+  //p = p / 100; // hPa
 
   return p;
 };
@@ -247,20 +234,12 @@ BMP180.prototype.calcPressure = function(raw) {
  * @returns {number}
  */
 BMP180.prototype.calcAltitude = function(pressure) {
-  return 44330 * (1.0 - Math.pow(pressure / this.sealevelPressure, 0.19029495718363));
-};
+  var posl = pressure / this.options.seaLevelPressure;
+  var powr = Math.pow(posl, 0.19029495718363);
+  var val = 44330 * (1 - powr);
 
-/**
- *
- * @param callback
- */
-BMP180.prototype.readAltitude = function(callback) {
-  var self = this;
-  this.readPressure(function(pressure) {
-    callback(self.calcAltitude(pressure));
-  });
+  return val;
 };
-
 
 // --- PRIVATE UTILITY FUNCTIONS -----------------------------------------------
 
@@ -277,4 +256,3 @@ function readRegister(i2c, register, callback) {
 }
 
 module.exports = BMP180;
-console.log('BMP180: Loaded driver');

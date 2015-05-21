@@ -2,10 +2,11 @@
  * Created by validity on 5/20/15.
  */
 var fs = require("fs");
-var PI_BLASTER_PATH = "/dev/pi-blaster";
+var FIFO_FILE_PATH = "/dev/servoblaster";
+
 function writeCommand(cmd, callback) {
   var buffer = new Buffer(cmd + "\n");
-  var fd = fs.open(PI_BLASTER_PATH, "w", undefined, function(err, fd) {
+  var fd = fs.open(FIFO_FILE_PATH, "w", undefined, function(err, fd) {
     if (err) {
       if (callback && typeof callback == 'function') callback(err);
     }
@@ -22,6 +23,7 @@ function writeCommand(cmd, callback) {
     }
   });
 }
+
 module.exports = {
   setPwm: function(pinNumber, value, callback) {
     writeCommand(pinNumber + "=" + value, callback);

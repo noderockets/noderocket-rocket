@@ -3386,13 +3386,13 @@ MPU6050.prototype.calibrate = function(callback) {
   this.warmup(device.warmups, function() {
     device.log('MPU6050:   calibration warmup complete.');
     var target = {
-      ax:   { zero: 0,    move: 1000, tolerance: 20 },
-      ay:   { zero: 0,    move: 1000, tolerance: 20 },
-      az:   { zero: down, move: 1000, tolerance: 20 },
+      ax:   { zero: 0,    move: 1000, tolerance: 50 },
+      ay:   { zero: 0,    move: 1000, tolerance: 50 },
+      az:   { zero: down, move: 1000, tolerance: 50 },
       tmp:  { zero: 0,    move: 0,    tolerance: 100 },
-      gy:   { zero: 0,    move: 50,   tolerance: 5 },
-      gx:   { zero: 0,    move: 50,   tolerance: 5 },
-      gz:   { zero: 0,    move: 50,   tolerance: 5 }
+      gy:   { zero: 0,    move: 50,   tolerance: 15 },
+      gx:   { zero: 0,    move: 50,   tolerance: 15 },
+      gz:   { zero: 0,    move: 50,   tolerance: 15 }
     };
     device.log('MPU6050:   calibration');
     device.recursiveCalibration(100, target, function(x) {

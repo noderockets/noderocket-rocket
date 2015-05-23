@@ -23,7 +23,7 @@ var defaults = {
     accelerometer: { mode: 3 },
     gyroscope: { mode: 0 },
     warmups: 0,
-    debug: false
+    debug: true
   },
   servo: {
     initAngle:    170,
@@ -75,12 +75,14 @@ var Rocket = function(opts) {
   // --- PREPARE SERVO ---------------------------------------------------------
 
   var servo = new Servo();
+  servo.setAngle(180);
   function testServo(angle) {
     servo.setAngle(angle);
     if (angle === 180) servo.disable();
     else setTimeout(function() { testServo(angle + 10); }, 500);
   }
-  testServo(0);
+  //testServo(0);
+
 
   // --- EVENT LISTENERS -------------------------------------------------------
 
@@ -187,13 +189,13 @@ var Rocket = function(opts) {
 
   this.armParachute = function() {
     elog.info("ARM PARACHUTE");
-    servo.setAngle(0);
+    servo.setAngle(180);
     setTimeout(function() { servo.disable }, 500);
   };
 
   this.deployParachute = function() {
     elog.info("DEPLOY PARACHUTE");
-    servo.setAngle(180);
+    servo.setAngle(0);
     setTimeout(function() { servo.disable }, 500);
   };
 };

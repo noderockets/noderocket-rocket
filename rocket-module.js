@@ -1,8 +1,9 @@
 var util = require('util');
 
-function RocketModule(name, rocket, io) {
+function RocketModule(name, rocket, io, app) {
   this.rocket = rocket;
   this.io = io;
+  this.app = app;
   this.enabled = false;
   this.name = name;
 }

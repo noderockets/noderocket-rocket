@@ -1,0 +1,65 @@
+<html>
+<head>
+  <title>My first Three.js app</title>
+  <style>
+    body { margin: 0; }
+    canvas { width: 100%; height: 100% }
+  </style>
+</head>
+<body>
+<script src="js/three.min.js"></script>
+<script>
+  var scene = new THREE.Scene();
+  var camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.5, 1000);
+
+  var renderer = new THREE.WebGLRenderer();
+  renderer.setSize( window.innerWidth, window.innerHeight );
+  document.body.appendChild( renderer.domElement );
+
+
+//  camera.position.z = 15;
+  camera.position.z = 6;
+  camera.position.y = 12;
+  camera.rotation.x = -1;
+//  camera.position.x = -10;
+
+//  cameraControls = new THREE.Or(camera, renderer.domElement);
+//  cameraControls.target.set(0,50,0);
+
+  var render = function () {
+    requestAnimationFrame( render );
+
+//    rocket.rotation.x += 0.1;
+    rocket.rotation.y += 0.01;
+//    rocket.rotation.y += 0.1;
+//    rocket.rotation.z += 0.1;
+
+//    rocket.position.y += 0.05;
+
+    renderer.render(scene, camera);
+  };
+
+//  render();
+
+
+  var light = new THREE.AmbientLight( 0x404040 ); // soft white light
+  scene.add( light );
+
+  var hemiLight = new THREE.HemisphereLight('#6666ff', '#224400', .8);
+  scene.add(hemiLight);
+
+
+
+  var rocket;
+
+  var loader = new THREE.ObjectLoader();
+  loader.load("rocket3.json",function ( obj ) {
+    rocket = obj;
+    scene.add( rocket );
+//    rocket.position.y = -5;
+
+    render();
+  });
+</script>
+</body>
+</html>

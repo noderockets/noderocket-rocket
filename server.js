@@ -26,7 +26,7 @@ io.set('log level', 1);
 app.use(express.static(__dirname + '/www'));
 
 // --- LOAD ROCKET MODULES ------------------------------------------------------------
-var moduleLoader = new ModuleLoader(rocket, io);
+var moduleLoader = new ModuleLoader(rocket, io, app);
 moduleLoader.loadFromDir();
 
 // --- SOCKET COMMUNICATION ----------------------------------------------------

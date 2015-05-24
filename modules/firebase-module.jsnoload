@@ -27,7 +27,7 @@ FirebaseModule.prototype.doEnable = function() {
 
     this.writeInterval = setInterval(function() {
       this.firebaseDb.set(this.data)
-    }.bind(this), 500);
+    }.bind(this), 100);
   }
 };
 

@@ -2,13 +2,14 @@ var _ = require('underscore');
 var fs = require('fs');
 var path = require('path');
 
-function ModuleLoader(rocket, io, opts) {
+function ModuleLoader(rocket, io, app, opts) {
   var defaultConfig = {
     moduleDir: 'modules'
   };
 
   this.rocket = rocket;
   this.io = io;
+  this.app = app;
   this.config = _.extend(defaultConfig, opts);
   this.modules = {};
 }
@@ -33,7 +34,7 @@ ModuleLoader.prototype.getModules = function() {
 };
 
 ModuleLoader.prototype.addModule = function(Module) {
-  var m = new Module(this.rocket, this.io);
+  var m = new Module(this.rocket, this.io, this.app);
   this.modules[m.name] = m;
 };
 

@@ -61,7 +61,7 @@
     .block {
       margin: 11px;
       background-color: rgba(102, 102, 102, .5);
-      border: 3px solid rgb(36, 70, 106);
+      border: 3px solid lightskyblue;
       border-radius: 8px;
       -webkit-box-shadow: none;
       box-shadow: none;
@@ -69,26 +69,22 @@
 
     .stat, .stat-val, .summary-val {
       float: left;
-      width: 200px;
-      font-size: 24px;
-      height: 50px;
-      line-height: 65px;
-      margin-right: 20px;
+      width: 140px;
+      font-size: 18px;
+      height: 26px;
+      line-height: 36px;
+      margin: 0 20px;
+      text-align: right;
     }
 
     .stat {
-      text-align: right;
       clear: both;
-    }
-
-    .summary-stat {
-
     }
 
     .separator {
       width: 100%;
       clear: both;
-      border-bottom: 3px solid rgb(36, 70, 106);
+      border-bottom: 3px solid lightskyblue;
       height: 13px;
     }
 
@@ -101,24 +97,54 @@
       color: white;
       font-weight: bold;
     }
+
+    .header2 {
+      color: lightskyblue;
+      font-weight: bold;
+    }
+
+    .header.left, .header2.left {
+      width: 240px;
+      margin-right: 40px;
+    }
   </style>
 </head>
 <body>
 
 <div class="block" style="width: 900px; height: 500px;">
-  <div class="stat header">Launched</div><div class="stat-val" id="launched"></div>
-  <div class="stat header">Deployed</div><div class="stat-val" id="deployed"></div>
+  <div class="stat header left">Launched</div><div class="stat-val" id="launched"></div>
+  <div class="stat header left">Parachute</div><div class="stat-val" id="parachute"></div>
+  <button onclick="arm()" class="btn btn-primary btn-lg">Arm</button>
+  <button onclick="deploy()" class="btn btn-primary btn-lg">Deploy</button>
+  <button onclick="testServo()" class="btn btn-primary btn-lg">Test Servo</button>
+  <button onclick="warmupMotionSensor()" class="btn btn-primary btn-lg">Warm-up</button>
+  <button onclick="calibrateMotionSensor()" class="btn btn-primary btn-lg">Calibrate</button>
+
   <div class="separator"></div>
-  <div class="stat header">Statistic</div><div class="stat-val header">Current</div><div class="summary-val header">Min</div><div class="summary-val header">Max</div>
-  <div class="stat header">Temperature</div><div class="stat-val" id="temperature"></div><div class="summary-val" id="temperature-min"></div><div class="summary-val" id="temperature-max"></div>
-  <div class="stat header">Pressure</div><div class="stat-val" id="pressure"></div><div class="summary-val" id="pressure-min"></div><div class="summary-val" id="pressure-max"></div>
-  <div class="stat header">Altitude</div><div class="stat-val" id="altitude"></div><div class="summary-val" id="altitude-min"></div><div class="summary-val" id="altitude-max"></div>
-  <div class="stat header">Time</div><div class="stat-val" id="time"></div>
+
+  <div class="stat header left">Statistic</div><div class="stat-val header">Current</div><div class="summary-val header">Min</div><div class="summary-val header">Max</div>
+
+  <div class="stat header2 left">Motion</div>
+  <div class="stat header left">Accelerometer X</div><div class="stat-val" id="accelerometer-x"></div><div class="summary-val" id="accelerometer-x-min"></div><div class="summary-val" id="accelerometer-x-max"></div>
+  <div class="stat header left">Accelerometer Y</div><div class="stat-val" id="accelerometer-y"></div><div class="summary-val" id="accelerometer-y-min"></div><div class="summary-val" id="accelerometer-y-max"></div>
+  <div class="stat header left">Accelerometer Z</div><div class="stat-val" id="accelerometer-z"></div><div class="summary-val" id="accelerometer-z-min"></div><div class="summary-val" id="accelerometer-z-max"></div>
+  <div class="stat header left">Gyroscope X</div><div class="stat-val" id="gyroscope-x"></div><div class="summary-val" id="gyroscope-x-min"></div><div class="summary-val" id="gyroscope-x-max"></div>
+  <div class="stat header left">Gyroscope Y</div><div class="stat-val" id="gyroscope-y"></div><div class="summary-val" id="gyroscope-y-min"></div><div class="summary-val" id="gyroscope-y-max"></div>
+  <div class="stat header left">Gyroscope Z</div><div class="stat-val" id="gyroscope-z"></div><div class="summary-val" id="gyroscope-z-min"></div><div class="summary-val" id="gyroscope-z-max"></div>
+
+  <div class="stat header2 left">Altimeter</div>
+  <div class="stat header left">Temperature</div><div class="stat-val" id="temperature"></div><div class="summary-val" id="temperature-min"></div><div class="summary-val" id="temperature-max"></div>
+  <div class="stat header left">Pressure</div><div class="stat-val" id="pressure"></div><div class="summary-val" id="pressure-min"></div><div class="summary-val" id="pressure-max"></div>
+  <div class="stat header left">Altitude</div><div class="stat-val" id="altitude"></div><div class="summary-val" id="altitude-min"></div><div class="summary-val" id="altitude-max"></div>
+  <div class="stat header left">Time</div><div class="stat-val" id="time"></div>
+
   <div class="separator"></div>
-  <div class="middler">
-    <button onclick="deploy()" class="btn btn-primary btn-lg">Deploy</button>
-    <button onclick="arm()" class="btn btn-primary btn-lg">Arm</button>
-  </div>
+
+  <div class="stat header left">Servo Position</div><div class="stat-val" id="servo-angle"></div>
+  <div class="stat header left">OS Uptime</div><div class="stat-val" id="os-uptime"></div>
+
+
+  <div class="middler"></div>
 </div>
 
 <div id="graph"></div>
@@ -130,16 +156,69 @@
 <script>
   var socket = io.connect();
 
+  var launchedEl = document.getElementById('launched');
+  var parachuteEl = document.getElementById('parachute');
+  var accelerometerXEl = document.getElementById('accelerometer-x');
+  var accelerometerXMinEl = document.getElementById('accelerometer-x-min');
+  var accelerometerXMaxEl = document.getElementById('accelerometer-x-max');
+  var accelerometerYEl = document.getElementById('accelerometer-y');
+  var accelerometerYMinEl = document.getElementById('accelerometer-y-min');
+  var accelerometerYMaxEl = document.getElementById('accelerometer-y-max');
+  var accelerometerZEl = document.getElementById('accelerometer-z');
+  var accelerometerZMinEl = document.getElementById('accelerometer-z-min');
+  var accelerometerZMaxEl = document.getElementById('accelerometer-z-max');
+  var gyroscopeXEl = document.getElementById('gyroscope-x');
+  var gyroscopeXMinEl = document.getElementById('gyroscope-x-min');
+  var gyroscopeXMaxEl = document.getElementById('gyroscope-x-max');
+  var gyroscopeYEl = document.getElementById('gyroscope-y');
+  var gyroscopeYMinEl = document.getElementById('gyroscope-y-min');
+  var gyroscopeYMaxEl = document.getElementById('gyroscope-y-max');
+  var gyroscopeZEl = document.getElementById('gyroscope-z');
+  var gyroscopeZMinEl = document.getElementById('gyroscope-z-min');
+  var gyroscopeZMaxEl = document.getElementById('gyroscope-z-max');
+  var temperatureEl = document.getElementById('temperature');
+  var temperatureMinEl = document.getElementById('temperature-min');
+  var temperatureMaxEl = document.getElementById('temperature-max');
+  var pressureEl = document.getElementById('pressure');
+  var pressureMinEl = document.getElementById('pressure-min');
+  var pressureMaxEl = document.getElementById('pressure-max');
+  var altitudeEl = document.getElementById('altitude');
+  var altitudeMinEl = document.getElementById('altitude-min');
+  var altitudeMaxEl = document.getElementById('altitude-max');
+  var timeEl = document.getElementById('time');
+  var servoEl = document.getElementById('servo-angle');
+  var osUptimeEl = document.getElementById('os-uptime');
+
   socket.on('hello', function (d) {
     console.log('Hello Rocket!');
   });
+
+  socket.on('rocket-servo', function(d) {
+    servoEl.innerHTML = d;
+  });
+
+  socket.on('rocket-uptime', function(d) {
+    osUptimeEl.innerHTML = d;
+  });
+
+  function arm() {
+    socket.emit('arm-parachute');
+  }
 
   function deploy() {
     socket.emit('deploy-parachute');
   }
 
-  function arm() {
-    socket.emit('arm-parachute');
+  function testServo() {
+    socket.emit('test-servo');
+  }
+
+  function warmupMotionSensor() {
+    socket.emit('warmup-motion-sensor');
+  }
+
+  function calibrateMotionSensor() {
+    socket.emit('calibrate-motion-sensor');
   }
 
   var data = [];
@@ -147,9 +226,6 @@
   var margin = {top: 20, right: 20, bottom: 30, left: 50},
       width = window.innerWidth - margin.left - margin.right,
       height = 250 - margin.top - margin.bottom;
-
-  // Parse the datetime
-  //  var parseDate = d3.time.format("%H:%M:%S").parse;
 
   var xScale = d3.time.scale()
       .range([0, width]);
@@ -198,7 +274,6 @@
       .attr('transform', 'translate(0,' + height + ')')
       .call(xAxis);
 
-
   svg.append('g')
       .attr('class', 'y axis')
       .call(yAxis)
@@ -219,17 +294,21 @@
   function updateData() {
 
     data.forEach(function (datum) {
-//    datum.time = parseDate(datum.time);
       datum.time = moment(datum.time).toDate();
       datum.altitude = +datum.altitude;
     });
 
-    xScale.domain(d3.extent(data, function (d) {
-      return d.time
+    xScale.domain(d3.extent(data, function(d) {
+      return d.time;
     }));
-    yScale.domain(d3.extent(data, function (d) {
-      return d.altitude
-    }));
+//    yScale.domain(d3.extent(data, function(d) {
+//      return d.altitude;
+//    }));
+    yScale.domain([
+      d3.min(data, function(d) { return d.altitude - 4; }),
+      d3.max(data, function(d) { return d.altitude + 4; })
+    ]);
+
 
     var svg = d3.select("body").transition();
 
@@ -249,65 +328,80 @@
   socket.on('rocket-data', function (d) {
     console.log(d);
 
-    var date = new moment();
+    var date = new moment(d.dt);
     data.push({
       altitude: d.alt,
       time: date
     });
 
-    data = data.splice(-150);
+    data = data.splice(-300);
     updateHUD(d, date);
     updateData();
   });
 
+  var minmax = {
+    accelerometerX: { min: Number.MAX_VALUE, max: Number.MIN_VALUE },
+    accelerometerY: { min: Number.MAX_VALUE, max: Number.MIN_VALUE },
+    accelerometerZ: { min: Number.MAX_VALUE, max: Number.MIN_VALUE },
+    gyroscopeX: { min: Number.MAX_VALUE, max: Number.MIN_VALUE },
+    gyroscopeY: { min: Number.MAX_VALUE, max: Number.MIN_VALUE },
+    gyroscopeZ: { min: Number.MAX_VALUE, max: Number.MIN_VALUE },
+    temperature: { min: Number.MAX_VALUE, max: Number.MIN_VALUE },
+    pressure: { min: Number.MAX_VALUE, max: Number.MIN_VALUE },
+    altitude: { min: Number.MAX_VALUE, max: Number.MIN_VALUE }
+  };
 
-//    setInterval(function () {
-//      var values = {
-//        launched: false,
-//        deployed: false,
-//        temperature: (Math.random() *.5) + 22.5,
-//        pressure: (Math.random() * 100) + 102000,
-//        altitude: Math.random() * 400,
-//        time: new moment()
-//      };
-//      data.push(values);
-//      updateHUD(values);
-//
-//      data = data.splice(-150);
-//      updateData();
-//    }, 200);
+  function updateHUD(val, date) {
+    minmax.accelerometerX.max = Math.max(minmax.accelerometerX.max, val.ax);
+    minmax.accelerometerX.min = Math.min(minmax.accelerometerX.min, val.ax);
+    minmax.accelerometerY.max = Math.max(minmax.accelerometerY.max, val.ay);
+    minmax.accelerometerY.min = Math.min(minmax.accelerometerY.min, val.ay);
+    minmax.accelerometerZ.max = Math.max(minmax.accelerometerZ.max, val.az);
+    minmax.accelerometerZ.min = Math.min(minmax.accelerometerZ.min, val.az);
+    minmax.gyroscopeX.max = Math.max(minmax.gyroscopeX.max, val.gx);
+    minmax.gyroscopeX.min = Math.min(minmax.gyroscopeX.min, val.gx);
+    minmax.gyroscopeY.max = Math.max(minmax.gyroscopeY.max, val.gy);
+    minmax.gyroscopeY.min = Math.min(minmax.gyroscopeY.min, val.gy);
+    minmax.gyroscopeZ.max = Math.max(minmax.gyroscopeZ.max, val.gz);
+    minmax.gyroscopeZ.min = Math.min(minmax.gyroscopeZ.min, val.gz);
+    minmax.temperature.max = Math.max(minmax.temperature.max, val.atmp);
+    minmax.temperature.min = Math.min(minmax.temperature.min, val.atmp);
+    minmax.pressure.max = Math.max(minmax.pressure.max, val.bp);
+    minmax.pressure.min = Math.min(minmax.pressure.min, val.bp);
+    minmax.altitude.max = Math.max(minmax.altitude.max, val.alt);
+    minmax.altitude.min = Math.min(minmax.altitude.min, val.alt);
 
-
-    var minmax = {
-      temperature: { min: Number.MAX_VALUE, max: Number.MIN_VALUE },
-      pressure: { min: Number.MAX_VALUE, max: Number.MIN_VALUE },
-      altitude: { min: Number.MAX_VALUE, max: Number.MIN_VALUE }
-    };
-    function updateHUD(val, date) {
-      var temperature = Math.round(val.atmp * 100) / 100;
-      var pressure = Math.round(val.bp * 100) / 100;
-      var altitude = Math.round(val.alt * 100) / 100;
-
-      minmax.temperature.max = Math.max(minmax.temperature.max, temperature);
-      minmax.temperature.min = Math.min(minmax.temperature.min, temperature);
-      minmax.pressure.max = Math.max(minmax.pressure.max, pressure);
-      minmax.pressure.min = Math.min(minmax.pressure.min, pressure);
-      minmax.altitude.max = Math.max(minmax.altitude.max, altitude);
-      minmax.altitude.min = Math.min(minmax.altitude.min, altitude);
-
-      document.getElementById('launched').innerHTML = val.launched;
-      document.getElementById('deployed').innerHTML = val.deployed;
-      document.getElementById('temperature').innerHTML = temperature;
-      document.getElementById('temperature-min').innerHTML = minmax.temperature.min;
-      document.getElementById('temperature-max').innerHTML = minmax.temperature.max;
-      document.getElementById('pressure').innerHTML = pressure;
-      document.getElementById('pressure-min').innerHTML = minmax.pressure.min;
-      document.getElementById('pressure-max').innerHTML = minmax.pressure.max;
-      document.getElementById('altitude').innerHTML = altitude;
-      document.getElementById('altitude-min').innerHTML = minmax.altitude.min;
-      document.getElementById('altitude-max').innerHTML = minmax.altitude.max;
-      document.getElementById('time').innerHTML = date.format('LTS');
-    }
+    launchedEl.innerHTML = val.launched;
+    parachuteEl.innerHTML = val.parachute;
+    accelerometerXEl.innerHTML = val.ax;
+    accelerometerXMinEl.innerHTML = minmax.accelerometerX.min;
+    accelerometerXMaxEl.innerHTML = minmax.accelerometerX.max;
+    accelerometerYEl.innerHTML = val.ay;
+    accelerometerYMinEl.innerHTML = minmax.accelerometerY.min;
+    accelerometerYMaxEl.innerHTML = minmax.accelerometerY.max;
+    accelerometerZEl.innerHTML = val.az;
+    accelerometerZMinEl.innerHTML = minmax.accelerometerZ.min;
+    accelerometerZMaxEl.innerHTML = minmax.accelerometerZ.max;
+    gyroscopeXEl.innerHTML = val.gx;
+    gyroscopeXMinEl.innerHTML = minmax.gyroscopeX.min;
+    gyroscopeXMaxEl.innerHTML = minmax.gyroscopeX.max;
+    gyroscopeYEl.innerHTML = val.gy;
+    gyroscopeYMinEl.innerHTML = minmax.gyroscopeY.min;
+    gyroscopeYMaxEl.innerHTML = minmax.gyroscopeY.max;
+    gyroscopeZEl.innerHTML = val.gz;
+    gyroscopeZMinEl.innerHTML = minmax.gyroscopeZ.min;
+    gyroscopeZMaxEl.innerHTML = minmax.gyroscopeZ.max;
+    temperatureEl.innerHTML = val.atmp;
+    temperatureMinEl.innerHTML = minmax.temperature.min;
+    temperatureMaxEl.innerHTML = minmax.temperature.max;
+    pressureEl.innerHTML = val.bp;
+    pressureMinEl.innerHTML = minmax.pressure.min;
+    pressureMaxEl.innerHTML = minmax.pressure.max;
+    altitudeEl.innerHTML = val.alt;
+    altitudeMinEl.innerHTML = minmax.altitude.min;
+    altitudeMaxEl.innerHTML = minmax.altitude.max;
+    timeEl.innerHTML = date.format('LTS');
+  }
 
 </script>
 

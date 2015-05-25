@@ -3376,29 +3376,32 @@ MPU6050.prototype.testAllDeviceFunctionality = function(callback) {
 };
 
 
+MPU6050.prototype.warmup = function(callback) {
+  this.log('MPU6050:   device warmup begun.');
+  this.warmup(this.warmups, function() {
+    device.log('MPU6050:   device warmup complete.');
+    callback();
+  });
+};
+
 MPU6050.prototype.calibrate = function(callback) {
-  this.log('MPU6050: Calibration begun.  This could take a minute...');
-  console.time('MPU6050: calibration complete');
+  this.log('MPU6050:   device calibration begun.');
   var device = this;
   var down = this.accelerometer.denominator;
 
-  this.log('MPU6050:   calibration warmup');
-  this.warmup(device.warmups, function() {
-    device.log('MPU6050:   calibration warmup complete.');
-    var target = {
-      ax:   { zero: 0,    move: 1000, tolerance: 50 },
-      ay:   { zero: 0,    move: 1000, tolerance: 50 },
-      az:   { zero: down, move: 1000, tolerance: 50 },
-      tmp:  { zero: 0,    move: 0,    tolerance: 100 },
-      gy:   { zero: 0,    move: 50,   tolerance: 15 },
-      gx:   { zero: 0,    move: 50,   tolerance: 15 },
-      gz:   { zero: 0,    move: 50,   tolerance: 15 }
-    };
-    device.log('MPU6050:   calibration');
-    device.recursiveCalibration(100, target, function(x) {
-      device.log('MPU6050:   calibration complete.');
-      callback(x);
-    });
+  var target = {
+    ax:   { zero: 0,    move: 1000, tolerance: 50 },
+    ay:   { zero: 0,    move: 1000, tolerance: 50 },
+    az:   { zero: down, move: 1000, tolerance: 50 },
+    tmp:  { zero: 0,    move: 0,    tolerance: 100 },
+    gy:   { zero: 0,    move: 50,   tolerance: 15 },
+    gx:   { zero: 0,    move: 50,   tolerance: 15 },
+    gz:   { zero: 0,    move: 50,   tolerance: 15 }
+  };
+
+  device.recursiveCalibration(100, target, function(x) {
+    device.log('MPU6050:   device calibration complete.');
+    callback(x);
   });
 };
 
@@ -3406,9 +3409,7 @@ MPU6050.prototype.warmup = function(warmups, callback) {
   this.logAppend('W');
 
   var device = this;
-  this.sampleMotion6Raw(1000, function(avgs) {
-    //device.log('Warm up: ' + warmups);
-    //device.log(avgs);
+  this.sampleMotion6Raw(1000, function() {
     if (warmups > 0) device.warmup(warmups - 1, callback);
     else callback();
   });
@@ -3419,28 +3420,16 @@ MPU6050.prototype.recursiveCalibration = function(samples, target, callback) {
 
   var device = this;
   this.sampleMotion6Raw(samples, function(avgs) {
-    //device.log('Accelerometer Averages:');
-    //console.dir(avgs);
-
     if (!device.isCalibrated(avgs, target)) {
       device.getOffsets(function(offsets) {
-        //device.log('Offsets:');
-        //console.dir(offsets);
-
         var sample = { avgs: avgs, offsets: offsets };
         device.calculateOffsetCorrections(sample, target);
-        //device.log('Corrections:');
-        //console.dir(corrections);
-
         device.adjustOffsets(target, function() {
-          //device.log('Adjustments Made.');
-
           device.recursiveCalibration(samples, target, callback);
         });
       });
     }
     else {
-      console.timeEnd('MPU6050: calibration complete');
       callback(avgs);
     }
   });
@@ -3510,7 +3499,7 @@ MPU6050.prototype.calculateOffsetCorrections = function(sample, target) {
       // Sensor values are too high
       if (tgt.move > 0) {
         // Direction Changed - Reduce Magnitude
-        tgt.move = Math.ceil(tgt.move / 3) * -1;
+        tgt.move = Math.ceil(tgt.move / 2) * -1;
       }
       tgt.offset = sample.offsets[n] + tgt.move;
     }
@@ -3518,7 +3507,7 @@ MPU6050.prototype.calculateOffsetCorrections = function(sample, target) {
       // Sensor values are too low
       if (tgt.move < 0) {
         // Direction Changed - Reduce Magnitude
-        tgt.move = Math.ceil(tgt.move / 3) * -1;
+        tgt.move = Math.ceil(tgt.move / 2) * -1;
       }
       tgt.offset = sample.offsets[n] + tgt.move;
     }

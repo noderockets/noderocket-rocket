@@ -1,4 +1,5 @@
 /* jshint node:true, strict:false, laxcomma:true */
+var os = require('os');
 var Log = require('log');
 var express = require('express');
 var HTTP = require('http');
@@ -38,19 +39,39 @@ rocket.on('rocket.data', function(data) {
   io.sockets.emit('rocket-data', data);
 });
 
+rocket.on('rocket.servo', function(data) {
+  io.sockets.emit('rocket-servo', data);
+});
+
 // Socket IO configuration
-io.sockets.on('connection', function (socket) {
+io.sockets.on('connection', function(socket) {
   serverlog.info('incoming connection');
 
   socket.emit('hello', {});
 
-  socket.on('arm-parachute', function(){
+  socket.on('arm-parachute', function() {
     rocket.armParachute();
   });
 
-  socket.on('deploy-parachute', function(){
+  socket.on('deploy-parachute', function() {
     rocket.deployParachute();
   });
+
+  socket.on('test-servo', function() {
+    rocket.testServo();
+  });
+
+  socket.on('warmupMotionSensor', function() {
+    rocket.warmupMotionSensor();
+  });
+
+  socket.on('calibrateMotionSensor', function() {
+    rocket.calibrateMotionSensor();
+  });
+
+  setInterval(function() {
+    socket.emit('rocket-uptime', os.uptime());
+  }, 10000);
 });
 
 

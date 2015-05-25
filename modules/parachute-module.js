@@ -10,6 +10,7 @@ function ParachuteModule(rocket, io) {
   var dataCnt = 0;
   var dataBuffer = [];
   var launched = false;
+  var timer;
 
   this.onRocketReady = function() {
     module.log('[%s] Got rocket ready event', module.getName());
@@ -38,8 +39,6 @@ function ParachuteModule(rocket, io) {
       dataCnt++;
     }
     else if (dataCnt === 20) {    // Average the 10 readings and set base alt
-      //module.log(dataBuffer);
-
       var total = 0;
       for (var i = 0; i < dataBuffer.length; i++) {
         total += dataBuffer[i];
@@ -47,21 +46,21 @@ function ParachuteModule(rocket, io) {
       sAlt = total / dataBuffer.length;
 
       module.log('[%s] Altitude set: %s', module.getName(), sAlt);
+      module.log('[%s] Waiting for accelerometer Y < 3', module.getName());
       dataCnt++;
     }
-    else if (dataCnt > 20) {
-      module.log(data.ay);
+    else if (dataCnt > 20 && !launched) {
       maxAlt = Math.max(data.alt, maxAlt);
       if (data.ay < -3) {
         module.log('[%s] LAUNCH', module.getName());
         launched = true;
       }
     }
-
-    if (launched) {
-      module.log(data.ay);
+    else if (launched) {
       maxAlt = Math.max(data.alt, maxAlt);
-      setTimeout(function() {
+      if (timer) return;
+
+      timer = setTimeout(function() {
         module.log('[%s] DEPLOY PARACHUTE', module.getName());
         rocket.deployParachute();
       }, 1800);

@@ -22,8 +22,8 @@ var defaults = {
     enabled: true,
     accelerometer: { mode: 3 },
     gyroscope: { mode: 0 },
-    warmups: 0,
-    debug: true
+    warmups: 10,
+    debug: false
   },
   servo: {
     initAngle:    170,
@@ -65,10 +65,7 @@ var Rocket = function(opts) {
     elog.debug('ROCKET: motion device initialized');
     motion.testAllDeviceFunctionality(function(err, something) {
       elog.debug('ROCKET: motion device tested... \n', something);
-      motion.calibrate(function() {
-        elog.debug('ROCKET: motion device calibrated.');
-        rocket.emit('motion.ready');
-      });
+      rocket.emit('motion.ready');
     });
   });
 
@@ -146,16 +143,16 @@ var Rocket = function(opts) {
 
   function adaptData(altitude, motion) {
     return {
-      ax: motion[0].toFixed(4),
-      ay: motion[1].toFixed(4),
-      az: motion[2].toFixed(4),
-      mtmp: motion[3].toFixed(2),
-      gx: motion[4].toFixed(4),
-      gy: motion[5].toFixed(4),
-      gz: motion[6].toFixed(4),
-      atmp: altitude.tmp.toFixed(2),
-      bp: altitude.bp.toFixed(2),
-      alt: fixBadAltitudeReadings(altitude.alt).toFixed(2),
+      ax: +motion[0].toFixed(4),
+      ay: +motion[1].toFixed(4),
+      az: +motion[2].toFixed(4),
+      mtmp: +motion[3].toFixed(2),
+      gx: +motion[4].toFixed(4),
+      gy: +motion[5].toFixed(4),
+      gz: +motion[6].toFixed(4),
+      atmp: +altitude.tmp.toFixed(2),
+      bp: +altitude.bp.toFixed(2),
+      alt: +fixBadAltitudeReadings(altitude.alt).toFixed(2),
       dt: +new Date
     }
   }
@@ -190,13 +187,37 @@ var Rocket = function(opts) {
   this.armParachute = function() {
     elog.info("ARM PARACHUTE");
     servo.setAngle(180);
+    rocket.emit('rocket.servo', '180');
     setTimeout(function() { servo.disable }, 500);
   };
 
   this.deployParachute = function() {
     elog.info("DEPLOY PARACHUTE");
     servo.setAngle(0);
+    rocket.emit('rocket.servo', '0');
     setTimeout(function() { servo.disable }, 500);
+  };
+
+  this.testServo = function() {
+    elog.info("TEST SERVO");
+    servo.setAngle(0);
+    rocket.emit('rocket.servo', '0');
+    setTimeout(function() {
+      servo.setAngle(180);
+      rocket.emit('rocket.servo', '180');
+    }, 1000);
+  };
+
+  this.warmupMotionSensor = function() {
+    motion.warmup(function() {
+      elog.debug('ROCKET: motion device warmed up.');
+    });
+  };
+
+  this.calibrateMotionSensor = function() {
+    motion.calibrate(function() {
+      elog.debug('ROCKET: motion device calibrated.');
+    });
   };
 };
 

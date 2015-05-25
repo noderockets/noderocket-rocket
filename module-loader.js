@@ -17,6 +17,7 @@ function ModuleLoader(rocket, io, app, opts) {
 ModuleLoader.prototype.loadFromDir = function () {
   fs.readdirSync(__dirname + '/' + this.config.moduleDir).forEach(function (file) {
     if (path.extname(file).toLowerCase() === '.js') {
+      console.log('Module Loader: loading file ', file);
       var Module = require(__dirname + '/' + this.config.moduleDir + '/' + file);
       this.addModule(Module);
     }
@@ -27,7 +28,8 @@ ModuleLoader.prototype.getModules = function() {
   return _.map(this.modules, function(module) {
       return {
         name: module.name,
-        enabled: module.isEnabled()
+        enabled: module.isEnabled(),
+        ui: module.getUserInterface()
       }
     }
   );

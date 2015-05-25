@@ -69,7 +69,7 @@
 
     .stat, .stat-val, .summary-val {
       float: left;
-      width: 90px;
+      width: 70px;
       font-size: 18px;
       height: 26px;
       line-height: 36px;
@@ -89,12 +89,17 @@
     }
 
     .triple {
-      width: 365px;
+      width: 275px;
     }
 
     .middler {
       text-align: center;
       padding: 0 33px;
+    }
+
+    .big-deal {
+      color: greenyellow;
+      text-shadow: 0 0 6px white;
     }
 
     .header {
@@ -108,26 +113,22 @@
     }
 
     .header.left, .header2.left {
-      width: 240px;
+      width: 180px;
       margin-right: 40px;
     }
   </style>
 </head>
 <body>
 
-<div class="block" style="width: 140px; height: 500px; float: left;">
-  <button onclick="arm()" class="btn btn-primary btn-lg btn-block">Arm</button>
-  <button onclick="deploy()" class="btn btn-primary btn-lg btn-block">Deploy</button>
-  <button onclick="testServo()" class="btn btn-primary btn-lg btn-block">Test Servo</button>
-  <button onclick="warmupMotionSensor()" class="btn btn-primary btn-lg btn-block">Warm-up</button>
-  <button onclick="calibrateMotionSensor()" class="btn btn-primary btn-lg btn-block">Calibrate</button>
+<div id="actions" class="block" style="width: 140px; height: 500px; float: left;">
+  <div class="stat" style="text-align: center">Actions</div>
+  <button onclick="arm()" class="btn btn-primary btn-block">Arm</button>
+  <button onclick="deploy()" class="btn btn-primary btn-block">Deploy</button>
+  <button onclick="testServo()" class="btn btn-primary btn-block">Test Servo</button>
+  <button onclick="warmupMotionSensor()" class="btn btn-primary btn-block">Warm-up</button>
+  <button onclick="calibrateMotionSensor()" class="btn btn-primary btn-block">Calibrate</button>
 </div>
-<div class="block" style="width: 760px; height: 500px; float: left;">
-  <div class="stat header left">Launched</div><div class="stat-val" id="launched"></div>
-  <div class="stat header left">Parachute</div><div class="stat-val" id="parachute"></div>
-
-  <div class="separator"></div>
-
+<div id="status" class="block" style="width: 600px; height: 500px; float: left;">
   <div class="stat header left">Statistic</div><div class="stat-val header">Current</div><div class="summary-val header">Min</div><div class="summary-val header">Max</div>
 
   <div class="stat header2 left">Motion</div>
@@ -149,8 +150,13 @@
   <div class="stat header left">Servo Position</div><div class="stat-val triple middler" id="servo-angle"></div>
   <div class="stat header left">OS Uptime</div><div class="stat-val triple middler" id="os-uptime"></div>
 
+  <div class="separator"></div>
+
 
   <div class="middler"></div>
+</div>
+<div id="modules" class="block" style="width: 140px; height: 500px; float: left;">
+  <div class="stat" style="text-align: center">Modules</div>
 </div>
 
 <div id="graph"></div>
@@ -194,6 +200,10 @@
   var timeEl = document.getElementById('time');
   var servoEl = document.getElementById('servo-angle');
   var osUptimeEl = document.getElementById('os-uptime');
+
+  var actionsEl = document.getElementById('actions');
+  var statusEl = document.getElementById('status');
+  var modulesEl = document.getElementById('modules');
 
   socket.on('hello', function (d) {
     console.log('Hello Rocket!');
@@ -331,8 +341,13 @@
 
   }
 
+  /**
+   * This is where the data comes in.
+   * If you want to see the data, uncomment the console log on the first line
+   * of this function.  You will get lots of it.
+   */
   socket.on('rocket-data', function (d) {
-    console.log(d);
+//    console.log(d);
 
     var date = new moment(d.dt);
     data.push({
@@ -377,8 +392,6 @@
     minmax.altitude.max = Math.max(minmax.altitude.max, val.alt);
     minmax.altitude.min = Math.min(minmax.altitude.min, val.alt);
 
-    launchedEl.innerHTML = val.launched;
-    parachuteEl.innerHTML = val.parachute;
     accelerometerXEl.innerHTML = val.ax;
     accelerometerXMinEl.innerHTML = minmax.accelerometerX.min;
     accelerometerXMaxEl.innerHTML = minmax.accelerometerX.max;
@@ -409,6 +422,110 @@
     timeEl.innerHTML = date.format('LTS');
   }
 
+  /**
+   *
+   */
+  var moduleArray = [];
+  function getModules() {
+    fetch('/modules')
+        .then(function(response) {
+          if (response.status !== 200) {
+            console.log('Looks like there was a problem. Status Code: ' + response.status);
+            return;
+          }
+
+          response.json().then(function(modules) {
+            modules.forEach(loadModule);
+          });
+        })
+        .catch(function(err) {
+          console.log('Fetch Error :-S', err);
+        });
+  }
+
+  function removeModuleButtons() {
+    moduleArray.forEach(function(button) {
+      modulesEl.removeChild(button);
+    });
+    moduleArray = [];
+  }
+
+  function loadModule(module) {
+    var button = document.createElement('button');
+    button.addEventListener('click', function() {
+      if (module.enabled) fetch('/modules/disable?module=' + module.name);
+      else                fetch('/modules/enable?module=' + module.name);
+      removeModuleButtons();
+      addModuleButtons();
+    }, false);
+    button.classList.add('btn');
+    button.classList.add((module.enabled) ? 'btn-success' : 'btn-danger');
+    button.classList.add('btn-block');
+    button.textContent = module.name;
+
+    applyModuleUI(module);
+
+    modulesEl.appendChild(button);
+    moduleArray.push(button);
+  }
+
+  function applyModuleUI(module) {
+    if (module.ui.actions) {
+      for (var action in module.ui.actions) {
+        addUIAction(action, module.ui.actions[action]);
+      }
+    }
+    if (module.ui.status) {
+      for (var status in module.ui.status) {
+        addUIStatus(status, module.ui.status[status]);
+      }
+    }
+  }
+
+  function addUIAction(name, action) {
+    var button = document.createElement('button');
+    button.addEventListener('click', function() {
+      openInNewTab(action);
+    }, false);
+    button.classList.add('btn');
+    button.classList.add('btn-block');
+    button.textContent = name;
+
+    actionsEl.appendChild(button);
+    moduleArray.push(button);
+    return button;
+  }
+
+  function addUIStatus(name, event) {
+    var div = document.createElement('div');
+    div.classList.add('stat');
+    div.classList.add('header');
+    div.classList.add('left');
+    div.textContent = name;
+
+    var val = document.createElement('div');
+    val.classList.add('stat-val');
+    val.classList.add('triple');
+    val.classList.add('middler');
+    val.classList.add('big-deal');
+    val.id = name;
+
+    statusEl.appendChild(div);
+    statusEl.appendChild(val);
+
+    socket.on(event, function(data) {
+      document.getElementById(name).textContent = data;
+    });
+
+    return div;
+  }
+
+  function openInNewTab(url) {
+    var win = window.open(url, '_blank');
+    win.focus();
+  }
+
+  getModules();
 </script>
 
 </body>

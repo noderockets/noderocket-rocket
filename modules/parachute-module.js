@@ -12,33 +12,31 @@ function ParachuteModule(rocket, io) {
   var launched = false;
   var timer;
 
+  this.ui = {
+    status: {
+      launched:  'parachute.rocket-launched',
+      parachute: 'parachute.rocket-parachute-deployed'
+    }
+  };
+
   this.onRocketReady = function() {
     module.log('[%s] Got rocket ready event', module.getName());
   };
 
-  //this.onRocketData = function(data) {
-  //  //module.log('[%s] Got rocket data: %j', module.getName(), data);
-  //
-  //  if(!sAlt) {
-  //    sAlt = data.alt;
-  //    module.log('[%s] Altitude set: %s', sAlt);
-  //  } else {
-  //    if((data.alt - sAlt) > 5) {
-  //      module.log('Deploy parachute');
-  //      rocket.deployParachute();
-  //    }
-  //  }
-  //};
-
   this.onRocketData = function(data) {
-    if (dataCnt < 10) {           // Throw away the first ten readings
+    // Throw away the first ten readings
+    if (dataCnt < 10) {
       dataCnt++;
     }
-    else if (dataCnt < 20) {      // Collect 10 Altitude Readings
+
+    // Collect 10 Altitude Readings
+    else if (dataCnt < 20) {
       dataBuffer.push(data.alt);
       dataCnt++;
     }
-    else if (dataCnt === 20) {    // Average the 10 readings and set base alt
+
+    // Average the 10 readings and set base alt
+    else if (dataCnt === 20) {
       var total = 0;
       for (var i = 0; i < dataBuffer.length; i++) {
         total += dataBuffer[i];
@@ -49,20 +47,26 @@ function ParachuteModule(rocket, io) {
       module.log('[%s] Waiting for accelerometer Y < 3', module.getName());
       dataCnt++;
     }
+
+    // Watch for launch
     else if (dataCnt > 20 && !launched) {
       maxAlt = Math.max(data.alt, maxAlt);
-      if (data.ay < -3) {
-        module.log('[%s] LAUNCH', module.getName());
+      if (data.ay < -.03) {
         launched = true;
+        io.sockets.emit('parachute.rocket-launched', launched);
+        module.log('[%s] LAUNCH', module.getName());
       }
     }
+
+    // LAUNCHED -- Deploy parachute after 1.8 seconds
     else if (launched) {
       maxAlt = Math.max(data.alt, maxAlt);
       if (timer) return;
 
       timer = setTimeout(function() {
-        module.log('[%s] DEPLOY PARACHUTE', module.getName());
         rocket.deployParachute();
+        io.sockets.emit('parachute.rocket-parachute-deployed', true);
+        module.log('[%s] DEPLOY PARACHUTE', module.getName());
       }, 1800);
     }
   };

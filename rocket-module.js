@@ -28,6 +28,10 @@ RocketModule.prototype.isEnabled = function() {
   return this.enabled;
 };
 
+RocketModule.prototype.getUserInterface = function() {
+  return this.ui;
+};
+
 RocketModule.prototype.log = function() {
   console.log(util.format.apply(this, arguments));
 };

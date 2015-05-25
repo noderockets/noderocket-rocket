@@ -8,6 +8,15 @@ function CameraModule(rocket, io, app) {
   var module = this;
   var camera;
 
+  this.ui = {
+    actions: {
+      photo:        '/camera/photo',
+      video:        '/camera/video',
+      'video-stop': '/camera/video/stop',
+      file:         '/camera/media/:file'
+    }
+  };
+
   app.get('/camera/photo', function(req, res) {
     var opts = _.extend({
       output: '/home/pi/noderocket/media/noderocket_' + new Date().valueOf() + '.jpg',

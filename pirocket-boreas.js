@@ -45,6 +45,7 @@ var Rocket = function(opts) {
   var config = _.extend({}, defaults, opts);
 
   EventEmitter.call(this);
+  var dataInterval;
   var altBuffer = [];
   var cnt = 0;
   var badDataCnt = 0;
@@ -131,7 +132,7 @@ var Rocket = function(opts) {
   }
 
   function readData() {
-    setInterval(function() {
+    dataInterval = setInterval(function() {
       altimeter.readData(function(aerr, altitude) {
         motion.getMotion6(function(merr, motion) {
           if (aerr || merr) setError(aerr || merr);
@@ -198,6 +199,12 @@ var Rocket = function(opts) {
     setTimeout(function() { servo.disable }, 500);
   };
 
+  this.getServoAngle = function() {
+    var angle = servo.getAngle();
+    rocket.emit('rocket.servo', '' + angle);
+    return angle;
+  };
+
   this.testServo = function() {
     elog.info("TEST SERVO");
     servo.setAngle(0);
@@ -209,14 +216,20 @@ var Rocket = function(opts) {
   };
 
   this.warmupMotionSensor = function() {
-    motion.warmup(function() {
+    if (dataInterval) clearInterval(dataInterval);
+    elog.debug('ROCKET: pause data collection to start motion warm-up.');
+    motion.warmup(config.motion.warmups, function() {
       elog.debug('ROCKET: motion device warmed up.');
+      readData();
     });
   };
 
   this.calibrateMotionSensor = function() {
+    if (dataInterval) clearInterval(dataInterval);
+    elog.debug('ROCKET: pause data collection to start motion calibration.');
     motion.calibrate(function() {
       elog.debug('ROCKET: motion device calibrated.');
+      readData();
     });
   };
 };

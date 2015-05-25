@@ -30,7 +30,12 @@ function Servo(opts) {
   this.hardware.unit = this.hardware.range / this.range;
 }
 
+Servo.prototype.getAngle = function() {
+  return this.angle;
+};
+
 Servo.prototype.setAngle = function(angle, callback) {
+  this.angle = angle;
   var level = this.getLevelForAngle(angle) + '%';
   servoblaster.setPwm(this.no, level, callback);
 };

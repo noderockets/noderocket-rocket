@@ -69,7 +69,7 @@
 
     .stat, .stat-val, .summary-val {
       float: left;
-      width: 140px;
+      width: 90px;
       font-size: 18px;
       height: 26px;
       line-height: 36px;
@@ -88,9 +88,13 @@
       height: 13px;
     }
 
+    .triple {
+      width: 365px;
+    }
+
     .middler {
       text-align: center;
-      padding: 33px;
+      padding: 0 33px;
     }
 
     .header {
@@ -111,14 +115,16 @@
 </head>
 <body>
 
-<div class="block" style="width: 900px; height: 500px;">
+<div class="block" style="width: 140px; height: 500px; float: left;">
+  <button onclick="arm()" class="btn btn-primary btn-lg btn-block">Arm</button>
+  <button onclick="deploy()" class="btn btn-primary btn-lg btn-block">Deploy</button>
+  <button onclick="testServo()" class="btn btn-primary btn-lg btn-block">Test Servo</button>
+  <button onclick="warmupMotionSensor()" class="btn btn-primary btn-lg btn-block">Warm-up</button>
+  <button onclick="calibrateMotionSensor()" class="btn btn-primary btn-lg btn-block">Calibrate</button>
+</div>
+<div class="block" style="width: 760px; height: 500px; float: left;">
   <div class="stat header left">Launched</div><div class="stat-val" id="launched"></div>
   <div class="stat header left">Parachute</div><div class="stat-val" id="parachute"></div>
-  <button onclick="arm()" class="btn btn-primary btn-lg">Arm</button>
-  <button onclick="deploy()" class="btn btn-primary btn-lg">Deploy</button>
-  <button onclick="testServo()" class="btn btn-primary btn-lg">Test Servo</button>
-  <button onclick="warmupMotionSensor()" class="btn btn-primary btn-lg">Warm-up</button>
-  <button onclick="calibrateMotionSensor()" class="btn btn-primary btn-lg">Calibrate</button>
 
   <div class="separator"></div>
 
@@ -136,12 +142,12 @@
   <div class="stat header left">Temperature</div><div class="stat-val" id="temperature"></div><div class="summary-val" id="temperature-min"></div><div class="summary-val" id="temperature-max"></div>
   <div class="stat header left">Pressure</div><div class="stat-val" id="pressure"></div><div class="summary-val" id="pressure-min"></div><div class="summary-val" id="pressure-max"></div>
   <div class="stat header left">Altitude</div><div class="stat-val" id="altitude"></div><div class="summary-val" id="altitude-min"></div><div class="summary-val" id="altitude-max"></div>
-  <div class="stat header left">Time</div><div class="stat-val" id="time"></div>
 
   <div class="separator"></div>
 
-  <div class="stat header left">Servo Position</div><div class="stat-val" id="servo-angle"></div>
-  <div class="stat header left">OS Uptime</div><div class="stat-val" id="os-uptime"></div>
+  <div class="stat header left">Time</div><div class="stat-val triple middler" id="time"></div>
+  <div class="stat header left">Servo Position</div><div class="stat-val triple middler" id="servo-angle"></div>
+  <div class="stat header left">OS Uptime</div><div class="stat-val triple middler" id="os-uptime"></div>
 
 
   <div class="middler"></div>

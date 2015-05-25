@@ -48,6 +48,7 @@ io.sockets.on('connection', function(socket) {
   serverlog.info('incoming connection');
 
   socket.emit('hello', {});
+  rocket.getServoAngle();
 
   socket.on('arm-parachute', function() {
     rocket.armParachute();
@@ -61,11 +62,11 @@ io.sockets.on('connection', function(socket) {
     rocket.testServo();
   });
 
-  socket.on('warmupMotionSensor', function() {
+  socket.on('warmup-motion-sensor', function() {
     rocket.warmupMotionSensor();
   });
 
-  socket.on('calibrateMotionSensor', function() {
+  socket.on('calibrate-motion-sensor', function() {
     rocket.calibrateMotionSensor();
   });
 

@@ -5,17 +5,18 @@ function ParachuteModule(rocket, io) {
   RocketModule.call(this, "parachute", rocket, io);
   var module = this;
 
-  var sAlt;
-  var maxAlt;
-  var dataCnt = 0;
-  var dataBuffer = [];
-  var launched = false;
+  var status_code = 0;
   var timer;
+
+  var status_text = [
+    'ready',
+    'launched',
+    'parachute deployed'
+  ];
 
   this.ui = {
     status: {
-      launched:  'parachute.rocket-launched',
-      parachute: 'parachute.rocket-parachute-deployed'
+      'parachute status':  'parachute.rocket-status'
     }
   };
 
@@ -24,51 +25,29 @@ function ParachuteModule(rocket, io) {
   };
 
   this.onRocketData = function(data) {
-    // Throw away the first ten readings
-    if (dataCnt < 10) {
-      dataCnt++;
-    }
-
-    // Collect 10 Altitude Readings
-    else if (dataCnt < 20) {
-      dataBuffer.push(data.alt);
-      dataCnt++;
-    }
-
-    // Average the 10 readings and set base alt
-    else if (dataCnt === 20) {
-      var total = 0;
-      for (var i = 0; i < dataBuffer.length; i++) {
-        total += dataBuffer[i];
-      }
-      sAlt = total / dataBuffer.length;
-
-      module.log('[%s] Altitude set: %s', module.getName(), sAlt);
-      module.log('[%s] Waiting for accelerometer Y < 3', module.getName());
-      dataCnt++;
-    }
-
     // Watch for launch
-    else if (dataCnt > 20 && !launched) {
-      maxAlt = Math.max(data.alt, maxAlt);
-      if (data.ay < -.03) {
-        launched = true;
-        io.sockets.emit('parachute.rocket-launched', launched);
-        module.log('[%s] LAUNCH', module.getName());
-      }
+    if (status_code === 0 && data.ay < -2) {
+      status_code = 1;
+      module.log('[%s] LAUNCH', module.getName());
     }
 
     // LAUNCHED -- Deploy parachute after 1.8 seconds
-    else if (launched) {
-      maxAlt = Math.max(data.alt, maxAlt);
+    else if (status_code === 1) {
       if (timer) return;
 
       timer = setTimeout(function() {
         rocket.deployParachute();
-        io.sockets.emit('parachute.rocket-parachute-deployed', true);
+        status_code = 2;
         module.log('[%s] DEPLOY PARACHUTE', module.getName());
+        setTimeout(function() {
+          timer = false;
+          status_code = 0;
+          rocket.armParachute();
+        }, 30000);
       }, 1800);
     }
+
+    io.sockets.emit('parachute.rocket-status', status_text[status_code]);
   };
 
   this.enable();

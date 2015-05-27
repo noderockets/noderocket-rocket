@@ -19,7 +19,7 @@ function CameraModule(rocket, io, app) {
 
   app.get('/camera/photo', function(req, res) {
     var opts = _.extend({
-      output: '/home/pi/noderocket/media/noderocket_' + new Date().valueOf() + '.jpg',
+      output: '/home/pi/media/noderocket_' + new Date().valueOf() + '.jpg',
       h: 1944,
       w: 2592,
       q: 80,
@@ -36,7 +36,7 @@ function CameraModule(rocket, io, app) {
 
   app.get('/camera/video', function(req, res) {
     var opts = _.extend({
-      output: '/home/pi/noderocket/media/noderocket_' + new Date().valueOf() + '.h264',
+      output: '/home/pi/media/noderocket_' + new Date().valueOf() + '.h264',
       h: 640,
       w: 480,
       framerate: 90,
@@ -72,7 +72,7 @@ function CameraModule(rocket, io, app) {
 
   app.get('/camera/media/:file', function(req, res) {
     var options = {
-      root: '/home/pi/noderocket/media/',
+      root: '/home/pi/media/',
       dotfiles: 'deny',
       headers: {
         'x-timestamp': Date.now(),

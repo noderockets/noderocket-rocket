@@ -1,14 +1,22 @@
 {
   "name": "noderocket",
   "version": "1.0.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/noderockets/noderocket-rocket.git"
+  },
   "dependencies": {
     "socket.io": "~0.9.16",
-    "express": "~3.4.8",
-    "cylon-i2c": "~0.10.1",
-    "cylon-raspi": "~0.6.2",
-    "cylon": "~0.11.0",
-    "cylon-gpio": "~0.11.0",
-    "underscore": "~1.6.0",
-    "moving-average": "0.0.4"
+    "express": "~4.8.0",
+    "cylon-i2c": "~0.21.1",
+    "cylon-raspi": "~0.16.0",
+    "cylon": "~1.0.0",
+    "cylon-gpio": "~0.23.0",
+    "moving-average": "0.0.4",
+    "i2c": "~0.2.0",
+    "underscore": "~1.8.3",
+    "log": "~1.4.0",
+    "pi-blaster.js": "0.1.0",
+    "raspicam": "0.2.13"
   }
 }

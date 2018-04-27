@@ -4,6 +4,25 @@
   <title>Node Rockets</title>
   <!--<link rel="stylesheet" href="css/rocket.css">-->
   <link rel="stylesheet" href="css/bootstrap.min.css"/>
+
+  <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+  <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+  <link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+  <link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+  <link rel="icon" type="image/png" sizes="192x192"  href="/android-icon-192x192.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="msapplication-TileColor" content="#ffffff">
+  <meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
+  <meta name="theme-color" content="#ffffff">
+
   <style>
     body {
       font: 10px sans-serif;
@@ -42,7 +61,7 @@
     .block {
       margin: 11px;
       background-color: rgba(102, 102, 102, .5);
-      border: 3px solid rgb(36, 70, 106);
+      border: 3px solid lightskyblue;
       border-radius: 8px;
       -webkit-box-shadow: none;
       box-shadow: none;
@@ -50,56 +69,94 @@
 
     .stat, .stat-val, .summary-val {
       float: left;
-      width: 200px;
-      font-size: 24px;
-      height: 50px;
-      line-height: 65px;
-      margin-right: 20px;
+      width: 70px;
+      font-size: 18px;
+      height: 26px;
+      line-height: 36px;
+      margin: 0 20px;
+      text-align: right;
     }
 
     .stat {
-      text-align: right;
       clear: both;
-    }
-
-    .summary-stat {
-
     }
 
     .separator {
       width: 100%;
       clear: both;
-      border-bottom: 3px solid rgb(36, 70, 106);
+      border-bottom: 3px solid lightskyblue;
       height: 13px;
+    }
+
+    .triple {
+      width: 275px;
     }
 
     .middler {
       text-align: center;
-      padding: 33px;
+      padding: 0 33px;
+    }
+
+    .big-deal {
+      color: greenyellow;
+      text-shadow: 0 0 6px white;
     }
 
     .header {
       color: white;
       font-weight: bold;
     }
+
+    .header2 {
+      color: lightskyblue;
+      font-weight: bold;
+    }
+
+    .header.left, .header2.left {
+      width: 180px;
+      margin-right: 40px;
+    }
   </style>
 </head>
 <body>
 
-<div class="block" style="width: 900px; height: 500px;">
-  <div class="stat header">Launched</div><div class="stat-val" id="launched"></div>
-  <div class="stat header">Deployed</div><div class="stat-val" id="deployed"></div>
+<div id="actions" class="block" style="width: 140px; height: 500px; float: left;">
+  <div class="stat" style="text-align: center">Actions</div>
+  <button onclick="arm()" class="btn btn-primary btn-block">Arm</button>
+  <button onclick="deploy()" class="btn btn-primary btn-block">Deploy</button>
+  <button onclick="testServo()" class="btn btn-primary btn-block">Test Servo</button>
+  <button onclick="warmupMotionSensor()" class="btn btn-primary btn-block">Warm-up</button>
+  <button onclick="calibrateMotionSensor()" class="btn btn-primary btn-block">Calibrate</button>
+</div>
+<div id="status" class="block" style="width: 600px; height: 500px; float: left;">
+  <div class="stat header left">Statistic</div><div class="stat-val header">Current</div><div class="summary-val header">Min</div><div class="summary-val header">Max</div>
+
+  <div class="stat header2 left">Motion</div>
+  <div class="stat header left">Accelerometer X</div><div class="stat-val" id="accelerometer-x"></div><div class="summary-val" id="accelerometer-x-min"></div><div class="summary-val" id="accelerometer-x-max"></div>
+  <div class="stat header left">Accelerometer Y</div><div class="stat-val" id="accelerometer-y"></div><div class="summary-val" id="accelerometer-y-min"></div><div class="summary-val" id="accelerometer-y-max"></div>
+  <div class="stat header left">Accelerometer Z</div><div class="stat-val" id="accelerometer-z"></div><div class="summary-val" id="accelerometer-z-min"></div><div class="summary-val" id="accelerometer-z-max"></div>
+  <div class="stat header left">Gyroscope X</div><div class="stat-val" id="gyroscope-x"></div><div class="summary-val" id="gyroscope-x-min"></div><div class="summary-val" id="gyroscope-x-max"></div>
+  <div class="stat header left">Gyroscope Y</div><div class="stat-val" id="gyroscope-y"></div><div class="summary-val" id="gyroscope-y-min"></div><div class="summary-val" id="gyroscope-y-max"></div>
+  <div class="stat header left">Gyroscope Z</div><div class="stat-val" id="gyroscope-z"></div><div class="summary-val" id="gyroscope-z-min"></div><div class="summary-val" id="gyroscope-z-max"></div>
+
+  <div class="stat header2 left">Altimeter</div>
+  <div class="stat header left">Temperature</div><div class="stat-val" id="temperature"></div><div class="summary-val" id="temperature-min"></div><div class="summary-val" id="temperature-max"></div>
+  <div class="stat header left">Pressure</div><div class="stat-val" id="pressure"></div><div class="summary-val" id="pressure-min"></div><div class="summary-val" id="pressure-max"></div>
+  <div class="stat header left">Altitude</div><div class="stat-val" id="altitude"></div><div class="summary-val" id="altitude-min"></div><div class="summary-val" id="altitude-max"></div>
+
   <div class="separator"></div>
-  <div class="stat header">Statistic</div><div class="stat-val header">Current</div><div class="summary-val header">Min</div><div class="summary-val header">Max</div>
-  <div class="stat header">Temperature</div><div class="stat-val" id="temperature"></div><div class="summary-val" id="temperature-min"></div><div class="summary-val" id="temperature-max"></div>
-  <div class="stat header">Pressure</div><div class="stat-val" id="pressure"></div><div class="summary-val" id="pressure-min"></div><div class="summary-val" id="pressure-max"></div>
-  <div class="stat header">Altitude</div><div class="stat-val" id="altitude"></div><div class="summary-val" id="altitude-min"></div><div class="summary-val" id="altitude-max"></div>
-  <div class="stat header">Time</div><div class="stat-val" id="time"></div>
+
+  <div class="stat header left">Time</div><div class="stat-val triple middler" id="time"></div>
+  <div class="stat header left">Servo Position</div><div class="stat-val triple middler" id="servo-angle"></div>
+  <div class="stat header left">OS Uptime</div><div class="stat-val triple middler" id="os-uptime"></div>
+
   <div class="separator"></div>
-  <div class="middler">
-    <button onclick="deploy()" class="btn btn-primary btn-lg">Deploy</button>
-    <button onclick="arm()" class="btn btn-primary btn-lg">Arm</button>
-  </div>
+
+
+  <div class="middler"></div>
+</div>
+<div id="modules" class="block" style="width: 140px; height: 500px; float: left;">
+  <div class="stat" style="text-align: center">Modules</div>
 </div>
 
 <div id="graph"></div>
@@ -111,16 +168,73 @@
 <script>
   var socket = io.connect();
 
+  var launchedEl = document.getElementById('launched');
+  var parachuteEl = document.getElementById('parachute');
+  var accelerometerXEl = document.getElementById('accelerometer-x');
+  var accelerometerXMinEl = document.getElementById('accelerometer-x-min');
+  var accelerometerXMaxEl = document.getElementById('accelerometer-x-max');
+  var accelerometerYEl = document.getElementById('accelerometer-y');
+  var accelerometerYMinEl = document.getElementById('accelerometer-y-min');
+  var accelerometerYMaxEl = document.getElementById('accelerometer-y-max');
+  var accelerometerZEl = document.getElementById('accelerometer-z');
+  var accelerometerZMinEl = document.getElementById('accelerometer-z-min');
+  var accelerometerZMaxEl = document.getElementById('accelerometer-z-max');
+  var gyroscopeXEl = document.getElementById('gyroscope-x');
+  var gyroscopeXMinEl = document.getElementById('gyroscope-x-min');
+  var gyroscopeXMaxEl = document.getElementById('gyroscope-x-max');
+  var gyroscopeYEl = document.getElementById('gyroscope-y');
+  var gyroscopeYMinEl = document.getElementById('gyroscope-y-min');
+  var gyroscopeYMaxEl = document.getElementById('gyroscope-y-max');
+  var gyroscopeZEl = document.getElementById('gyroscope-z');
+  var gyroscopeZMinEl = document.getElementById('gyroscope-z-min');
+  var gyroscopeZMaxEl = document.getElementById('gyroscope-z-max');
+  var temperatureEl = document.getElementById('temperature');
+  var temperatureMinEl = document.getElementById('temperature-min');
+  var temperatureMaxEl = document.getElementById('temperature-max');
+  var pressureEl = document.getElementById('pressure');
+  var pressureMinEl = document.getElementById('pressure-min');
+  var pressureMaxEl = document.getElementById('pressure-max');
+  var altitudeEl = document.getElementById('altitude');
+  var altitudeMinEl = document.getElementById('altitude-min');
+  var altitudeMaxEl = document.getElementById('altitude-max');
+  var timeEl = document.getElementById('time');
+  var servoEl = document.getElementById('servo-angle');
+  var osUptimeEl = document.getElementById('os-uptime');
+
+  var actionsEl = document.getElementById('actions');
+  var statusEl = document.getElementById('status');
+  var modulesEl = document.getElementById('modules');
+
   socket.on('hello', function (d) {
     console.log('Hello Rocket!');
   });
+
+  socket.on('rocket-servo', function(d) {
+    servoEl.innerHTML = d;
+  });
+
+  socket.on('rocket-uptime', function(d) {
+    osUptimeEl.innerHTML = d;
+  });
+
+  function arm() {
+    socket.emit('arm-parachute');
+  }
 
   function deploy() {
     socket.emit('deploy-parachute');
   }
 
-  function arm() {
-    socket.emit('arm-parachute');
+  function testServo() {
+    socket.emit('test-servo');
+  }
+
+  function warmupMotionSensor() {
+    socket.emit('warmup-motion-sensor');
+  }
+
+  function calibrateMotionSensor() {
+    socket.emit('calibrate-motion-sensor');
   }
 
   var data = [];
@@ -128,9 +242,6 @@
   var margin = {top: 20, right: 20, bottom: 30, left: 50},
       width = window.innerWidth - margin.left - margin.right,
       height = 250 - margin.top - margin.bottom;
-
-  // Parse the datetime
-  //  var parseDate = d3.time.format("%H:%M:%S").parse;
 
   var xScale = d3.time.scale()
       .range([0, width]);
@@ -179,7 +290,6 @@
       .attr('transform', 'translate(0,' + height + ')')
       .call(xAxis);
 
-
   svg.append('g')
       .attr('class', 'y axis')
       .call(yAxis)
@@ -200,17 +310,21 @@
   function updateData() {
 
     data.forEach(function (datum) {
-//    datum.time = parseDate(datum.time);
       datum.time = moment(datum.time).toDate();
       datum.altitude = +datum.altitude;
     });
 
-    xScale.domain(d3.extent(data, function (d) {
-      return d.time
+    xScale.domain(d3.extent(data, function(d) {
+      return d.time;
     }));
-    yScale.domain(d3.extent(data, function (d) {
-      return d.altitude
-    }));
+//    yScale.domain(d3.extent(data, function(d) {
+//      return d.altitude;
+//    }));
+    yScale.domain([
+      d3.min(data, function(d) { return d.altitude - 4; }),
+      d3.max(data, function(d) { return d.altitude + 4; })
+    ]);
+
 
     var svg = d3.select("body").transition();
 
@@ -227,69 +341,191 @@
 
   }
 
+  /**
+   * This is where the data comes in.
+   * If you want to see the data, uncomment the console log on the first line
+   * of this function.  You will get lots of it.
+   */
   socket.on('rocket-data', function (d) {
-    console.log(d);
+//    console.log(d);
 
-    var date = new moment();
+    var date = new moment(d.dt);
     data.push({
-      altitude: d.altitude,
+      altitude: d.alt,
       time: date
     });
 
-    data = data.splice(-150);
+    data = data.splice(-300);
     updateHUD(d, date);
     updateData();
   });
 
+  var minmax = {
+    accelerometerX: { min: Number.MAX_VALUE, max: Number.MIN_VALUE },
+    accelerometerY: { min: Number.MAX_VALUE, max: Number.MIN_VALUE },
+    accelerometerZ: { min: Number.MAX_VALUE, max: Number.MIN_VALUE },
+    gyroscopeX: { min: Number.MAX_VALUE, max: Number.MIN_VALUE },
+    gyroscopeY: { min: Number.MAX_VALUE, max: Number.MIN_VALUE },
+    gyroscopeZ: { min: Number.MAX_VALUE, max: Number.MIN_VALUE },
+    temperature: { min: Number.MAX_VALUE, max: Number.MIN_VALUE },
+    pressure: { min: Number.MAX_VALUE, max: Number.MIN_VALUE },
+    altitude: { min: Number.MAX_VALUE, max: Number.MIN_VALUE }
+  };
 
-//    setInterval(function () {
-//      var values = {
-//        launched: false,
-//        deployed: false,
-//        temperature: (Math.random() *.5) + 22.5,
-//        pressure: (Math.random() * 100) + 102000,
-//        altitude: Math.random() * 400,
-//        time: new moment()
-//      };
-//      data.push(values);
-//      updateHUD(values);
-//
-//      data = data.splice(-150);
-//      updateData();
-//    }, 200);
+  function updateHUD(val, date) {
+    minmax.accelerometerX.max = Math.max(minmax.accelerometerX.max, val.ax);
+    minmax.accelerometerX.min = Math.min(minmax.accelerometerX.min, val.ax);
+    minmax.accelerometerY.max = Math.max(minmax.accelerometerY.max, val.ay);
+    minmax.accelerometerY.min = Math.min(minmax.accelerometerY.min, val.ay);
+    minmax.accelerometerZ.max = Math.max(minmax.accelerometerZ.max, val.az);
+    minmax.accelerometerZ.min = Math.min(minmax.accelerometerZ.min, val.az);
+    minmax.gyroscopeX.max = Math.max(minmax.gyroscopeX.max, val.gx);
+    minmax.gyroscopeX.min = Math.min(minmax.gyroscopeX.min, val.gx);
+    minmax.gyroscopeY.max = Math.max(minmax.gyroscopeY.max, val.gy);
+    minmax.gyroscopeY.min = Math.min(minmax.gyroscopeY.min, val.gy);
+    minmax.gyroscopeZ.max = Math.max(minmax.gyroscopeZ.max, val.gz);
+    minmax.gyroscopeZ.min = Math.min(minmax.gyroscopeZ.min, val.gz);
+    minmax.temperature.max = Math.max(minmax.temperature.max, val.atmp);
+    minmax.temperature.min = Math.min(minmax.temperature.min, val.atmp);
+    minmax.pressure.max = Math.max(minmax.pressure.max, val.bp);
+    minmax.pressure.min = Math.min(minmax.pressure.min, val.bp);
+    minmax.altitude.max = Math.max(minmax.altitude.max, val.alt);
+    minmax.altitude.min = Math.min(minmax.altitude.min, val.alt);
 
+    accelerometerXEl.innerHTML = val.ax;
+    accelerometerXMinEl.innerHTML = minmax.accelerometerX.min;
+    accelerometerXMaxEl.innerHTML = minmax.accelerometerX.max;
+    accelerometerYEl.innerHTML = val.ay;
+    accelerometerYMinEl.innerHTML = minmax.accelerometerY.min;
+    accelerometerYMaxEl.innerHTML = minmax.accelerometerY.max;
+    accelerometerZEl.innerHTML = val.az;
+    accelerometerZMinEl.innerHTML = minmax.accelerometerZ.min;
+    accelerometerZMaxEl.innerHTML = minmax.accelerometerZ.max;
+    gyroscopeXEl.innerHTML = val.gx;
+    gyroscopeXMinEl.innerHTML = minmax.gyroscopeX.min;
+    gyroscopeXMaxEl.innerHTML = minmax.gyroscopeX.max;
+    gyroscopeYEl.innerHTML = val.gy;
+    gyroscopeYMinEl.innerHTML = minmax.gyroscopeY.min;
+    gyroscopeYMaxEl.innerHTML = minmax.gyroscopeY.max;
+    gyroscopeZEl.innerHTML = val.gz;
+    gyroscopeZMinEl.innerHTML = minmax.gyroscopeZ.min;
+    gyroscopeZMaxEl.innerHTML = minmax.gyroscopeZ.max;
+    temperatureEl.innerHTML = val.atmp;
+    temperatureMinEl.innerHTML = minmax.temperature.min;
+    temperatureMaxEl.innerHTML = minmax.temperature.max;
+    pressureEl.innerHTML = val.bp;
+    pressureMinEl.innerHTML = minmax.pressure.min;
+    pressureMaxEl.innerHTML = minmax.pressure.max;
+    altitudeEl.innerHTML = val.alt;
+    altitudeMinEl.innerHTML = minmax.altitude.min;
+    altitudeMaxEl.innerHTML = minmax.altitude.max;
+    timeEl.innerHTML = date.format('LTS');
+  }
 
-    var minmax = {
-      temperature: { min: Number.MAX_VALUE, max: Number.MIN_VALUE },
-      pressure: { min: Number.MAX_VALUE, max: Number.MIN_VALUE },
-      altitude: { min: Number.MAX_VALUE, max: Number.MIN_VALUE }
-    };
-    function updateHUD(val, date) {
-      var temperature = Math.round(val.temperature * 100) / 100;
-      var pressure = Math.round(val.pressure * 100) / 100;
-      var altitude = Math.round(val.altitude * 100) / 100;
+  /**
+   *
+   */
+  var moduleArray = [];
+  function getModules() {
+    fetch('/modules')
+        .then(function(response) {
+          if (response.status !== 200) {
+            console.log('Looks like there was a problem. Status Code: ' + response.status);
+            return;
+          }
 
-      minmax.temperature.max = Math.max(minmax.temperature.max, temperature);
-      minmax.temperature.min = Math.min(minmax.temperature.min, temperature);
-      minmax.pressure.max = Math.max(minmax.pressure.max, pressure);
-      minmax.pressure.min = Math.min(minmax.pressure.min, pressure);
-      minmax.altitude.max = Math.max(minmax.altitude.max, altitude);
-      minmax.altitude.min = Math.min(minmax.altitude.min, altitude);
+          response.json().then(function(modules) {
+            modules.forEach(loadModule);
+          });
+        })
+        .catch(function(err) {
+          console.log('Fetch Error :-S', err);
+        });
+  }
 
-      document.getElementById('launched').innerHTML = val.launched;
-      document.getElementById('deployed').innerHTML = val.deployed;
-      document.getElementById('temperature').innerHTML = temperature;
-      document.getElementById('temperature-min').innerHTML = minmax.temperature.min;
-      document.getElementById('temperature-max').innerHTML = minmax.temperature.max;
-      document.getElementById('pressure').innerHTML = pressure;
-      document.getElementById('pressure-min').innerHTML = minmax.pressure.min;
-      document.getElementById('pressure-max').innerHTML = minmax.pressure.max;
-      document.getElementById('altitude').innerHTML = altitude;
-      document.getElementById('altitude-min').innerHTML = minmax.altitude.min;
-      document.getElementById('altitude-max').innerHTML = minmax.altitude.max;
-      document.getElementById('time').innerHTML = date.format('LTS');
+  function removeModuleButtons() {
+    moduleArray.forEach(function(button) {
+      modulesEl.removeChild(button);
+    });
+    moduleArray = [];
+  }
+
+  function loadModule(module) {
+    var button = document.createElement('button');
+    button.addEventListener('click', function() {
+      if (module.enabled) fetch('/modules/disable?module=' + module.name);
+      else                fetch('/modules/enable?module=' + module.name);
+      removeModuleButtons();
+      addModuleButtons();
+    }, false);
+    button.classList.add('btn');
+    button.classList.add((module.enabled) ? 'btn-success' : 'btn-danger');
+    button.classList.add('btn-block');
+    button.textContent = module.name;
+
+    applyModuleUI(module);
+
+    modulesEl.appendChild(button);
+    moduleArray.push(button);
+  }
+
+  function applyModuleUI(module) {
+    if (module.ui.actions) {
+      for (var action in module.ui.actions) {
+        addUIAction(action, module.ui.actions[action]);
+      }
     }
+    if (module.ui.status) {
+      for (var status in module.ui.status) {
+        addUIStatus(status, module.ui.status[status]);
+      }
+    }
+  }
 
+  function addUIAction(name, action) {
+    var button = document.createElement('button');
+    button.addEventListener('click', function() {
+      openInNewTab(action);
+    }, false);
+    button.classList.add('btn');
+    button.classList.add('btn-block');
+    button.textContent = name;
+
+    actionsEl.appendChild(button);
+    moduleArray.push(button);
+    return button;
+  }
+
+  function addUIStatus(name, event) {
+    var div = document.createElement('div');
+    div.classList.add('stat');
+    div.classList.add('header');
+    div.classList.add('left');
+    div.textContent = name;
+
+    var val = document.createElement('div');
+    val.classList.add('stat-val');
+    val.classList.add('triple');
+    val.classList.add('middler');
+    val.classList.add('big-deal');
+    val.id = name;
+
+    statusEl.appendChild(div);
+    statusEl.appendChild(val);
+
+    socket.on(event, function(data) {
+      document.getElementById(name).textContent = data;
+    });
+
+    return div;
+  }
+
+  function openInNewTab(url) {
+    var win = window.open(url, '_blank');
+    win.focus();
+  }
+
+  getModules();
 </script>
 
 </body>
